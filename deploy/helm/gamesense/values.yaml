@@ -1,0 +1,10 @@
+frontend:
+  image: gamesense-frontend:local
+  replicas: 1
+backend:
+  image: gamesense-backend:local
+  replicas: 1
+ingress:
+  enabled: true
+  className: alb
+  host: gamesense.example.com

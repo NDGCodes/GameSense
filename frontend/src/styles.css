@@ -1,0 +1,12 @@
+body { margin: 0; font-family: Inter, system-ui, sans-serif; background: #101827; color: #f8fafc; }
+main { max-width: 960px; margin: 0 auto; padding: 4rem 1.5rem; }
+.hero { margin-bottom: 2rem; }
+.eyebrow { color: #38bdf8; text-transform: uppercase; letter-spacing: .14em; font-weight: 700; }
+h1 { font-size: clamp(2.5rem, 6vw, 4.5rem); line-height: 1; margin: 0; }
+.panel { background: #172036; border: 1px solid #334155; border-radius: 24px; padding: 1.5rem; display: grid; gap: 1rem; }
+label { display: grid; gap: .4rem; color: #cbd5e1; }
+input, select, button { border-radius: 12px; border: 1px solid #475569; padding: .8rem 1rem; font: inherit; }
+button { background: #38bdf8; color: #082f49; font-weight: 800; cursor: pointer; }
+.cards { display: grid; gap: .75rem; }
+article { background: #0f172a; border: 1px solid #334155; padding: 1rem; border-radius: 16px; }
+.error { color: #fca5a5; }
