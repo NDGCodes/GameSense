@@ -1,4 +1,7 @@
-fastapi==0.115.5
-uvicorn[standard]==0.32.1
+alembic==1.14.0
+fastapi==0.143.0
+pg8000==1.31.5
 prometheus-client==0.21.0
-pydantic==2.10.2
+pydantic==2.14.0
+SQLAlchemy==2.0.36
+uvicorn[standard]==0.32.1

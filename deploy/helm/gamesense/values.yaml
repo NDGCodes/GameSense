@@ -1,10 +1,52 @@
+nameOverride: ""
+fullnameOverride: ""
+
+imageRegistry: ghcr.io
+imagePullSecrets: []
+
 frontend:
-  image: gamesense-frontend:local
-  replicas: 1
+  replicaCount: 1
+  image:
+    repository: ndgcodes/gamesense-frontend
+    tag: latest
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 80
+  resources: {}
+
 backend:
-  image: gamesense-backend:local
-  replicas: 1
+  replicaCount: 1
+  image:
+    repository: ndgcodes/gamesense-backend
+    tag: latest
+    pullPolicy: IfNotPresent
+  env:
+    GAMESENSE_ENV: kubernetes
+    CORS_ALLOWED_ORIGINS: https://gamesense.example.com,http://localhost:5173,http://localhost:3000
+  database:
+    # Optional: create a Kubernetes Secret separately and set its name here.
+    # The secret value should be a SQLAlchemy DATABASE_URL such as postgresql+pg8000://...
+    urlSecretName: ""
+    urlSecretKey: DATABASE_URL
+  service:
+    type: ClusterIP
+    port: 8000
+  probes:
+    livenessPath: /health
+    readinessPath: /ready
+  resources: {}
+  podAnnotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "8000"
+    prometheus.io/path: /metrics
+
 ingress:
   enabled: true
   className: alb
   host: gamesense.example.com
+  path: /
+  pathType: Prefix
+  annotations:
+    alb.ingress.kubernetes.io/scheme: internet-facing
+  tls: []

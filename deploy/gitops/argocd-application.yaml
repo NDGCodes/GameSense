@@ -3,12 +3,17 @@ kind: Application
 metadata:
   name: gamesense
   namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
 spec:
   project: default
   source:
-    repoURL: https://github.com/REPLACE_WITH_OWNER/gamesense.git
+    repoURL: https://github.com/NDGCodes/GameSense.git
     targetRevision: main
     path: deploy/helm/gamesense
+    helm:
+      valueFiles:
+        - values.yaml
   destination:
     server: https://kubernetes.default.svc
     namespace: gamesense
@@ -18,3 +23,5 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
+      - PrunePropagationPolicy=foreground
+      - PruneLast=true
