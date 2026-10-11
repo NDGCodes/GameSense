@@ -1,0 +1,1 @@
+"""GameSense FastAPI application package."""

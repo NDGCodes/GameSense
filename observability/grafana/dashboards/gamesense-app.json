@@ -1,19 +1,49 @@
 {
   "title": "GameSense Application Metrics",
   "schemaVersion": 39,
-  "version": 1,
+  "version": 2,
+  "refresh": "15s",
+  "tags": ["gamesense", "demo-fixture"],
   "panels": [
     {
       "type": "stat",
       "title": "Recommendation Requests",
-      "targets": [{ "expr": "sum(gamesense_requests_total{route=\"/api/recommendations\"})" }],
-      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 }
+      "targets": [
+        {
+          "expr": "sum(gamesense_http_requests_total{route=\"/api/recommendations\"})"
+        }
+      ],
+      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 0 }
+    },
+    {
+      "type": "stat",
+      "title": "Demo Catalog Items",
+      "targets": [
+        {
+          "expr": "max(gamesense_demo_catalog_games)"
+        }
+      ],
+      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 0 }
     },
     {
       "type": "timeseries",
       "title": "Recommendation Latency p95",
-      "targets": [{ "expr": "histogram_quantile(0.95, sum(rate(gamesense_recommendation_seconds_bucket[5m])) by (le))" }],
-      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 }
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(gamesense_recommendation_seconds_bucket[5m])) by (le))"
+        }
+      ],
+      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 0 }
+    },
+    {
+      "type": "timeseries",
+      "title": "HTTP Request Rate by Route and Status",
+      "targets": [
+        {
+          "expr": "sum by (route, status_code) (rate(gamesense_http_requests_total[5m]))"
+        }
+      ],
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 8 }
     }
   ]
 }

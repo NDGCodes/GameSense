@@ -2,11 +2,21 @@ body { margin: 0; font-family: Inter, system-ui, sans-serif; background: #101827
 main { max-width: 960px; margin: 0 auto; padding: 4rem 1.5rem; }
 .hero { margin-bottom: 2rem; }
 .eyebrow { color: #38bdf8; text-transform: uppercase; letter-spacing: .14em; font-weight: 700; }
-h1 { font-size: clamp(2.5rem, 6vw, 4.5rem); line-height: 1; margin: 0; }
+h1 { font-size: clamp(2.4rem, 6vw, 4.25rem); line-height: 1; margin: 0; }
 .panel { background: #172036; border: 1px solid #334155; border-radius: 24px; padding: 1.5rem; display: grid; gap: 1rem; }
 label { display: grid; gap: .4rem; color: #cbd5e1; }
 input, select, button { border-radius: 12px; border: 1px solid #475569; padding: .8rem 1rem; font: inherit; }
 button { background: #38bdf8; color: #082f49; font-weight: 800; cursor: pointer; }
+button:hover { background: #7dd3fc; }
+.status { display: inline-flex; border-radius: 999px; padding: .35rem .7rem; background: #1e293b; color: #cbd5e1; font-weight: 700; }
+.status-ok { color: #86efac; }
+.status-unavailable { color: #fca5a5; }
+.results { display: grid; gap: 1rem; }
+.notice { border-left: 4px solid #38bdf8; padding-left: .75rem; color: #bae6fd; }
 .cards { display: grid; gap: .75rem; }
 article { background: #0f172a; border: 1px solid #334155; padding: 1rem; border-radius: 16px; }
+.card-header { align-items: start; display: flex; gap: 1rem; justify-content: space-between; }
+h2 { font-size: 1.1rem; margin: 0; }
+.card-header span { background: #334155; border-radius: 999px; color: #cbd5e1; font-size: .8rem; padding: .25rem .55rem; white-space: nowrap; }
+.genres { color: #93c5fd; font-weight: 700; }
 .error { color: #fca5a5; }

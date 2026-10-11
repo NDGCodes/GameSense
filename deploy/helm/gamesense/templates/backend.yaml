@@ -1,33 +1,75 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: gamesense-backend
+  name: {{ include "gamesense.fullname" . }}-backend
+  labels:
+    {{- include "gamesense.labels" . | nindent 4 }}
+    app.kubernetes.io/component: backend
 spec:
-  replicas: {{ .Values.backend.replicas }}
+  replicas: {{ .Values.backend.replicaCount }}
   selector:
-    matchLabels: { app: gamesense-backend }
+    matchLabels:
+      {{- include "gamesense.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: backend
   template:
     metadata:
-      labels: { app: gamesense-backend }
+      labels:
+        {{- include "gamesense.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: backend
       annotations:
-        prometheus.io/scrape: "true"
-        prometheus.io/port: "8000"
-        prometheus.io/path: /metrics
+        {{- toYaml .Values.backend.podAnnotations | nindent 8 }}
     spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       containers:
         - name: backend
-          image: {{ .Values.backend.image }}
-          ports: [{ containerPort: 8000 }]
-          readinessProbe: { httpGet: { path: /health, port: 8000 } }
-          livenessProbe: { httpGet: { path: /health, port: 8000 } }
+          image: {{ include "gamesense.image" (dict "registry" .Values.imageRegistry "repository" .Values.backend.image.repository "tag" .Values.backend.image.tag) | quote }}
+          imagePullPolicy: {{ .Values.backend.image.pullPolicy }}
+          env:
+            - name: GAMESENSE_ENV
+              value: {{ .Values.backend.env.GAMESENSE_ENV | quote }}
+            - name: CORS_ALLOWED_ORIGINS
+              value: {{ .Values.backend.env.CORS_ALLOWED_ORIGINS | quote }}
+            {{- if .Values.backend.database.urlSecretName }}
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.backend.database.urlSecretName | quote }}
+                  key: {{ .Values.backend.database.urlSecretKey | quote }}
+            {{- end }}
+          ports:
+            - name: http
+              containerPort: 8000
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.backend.probes.readinessPath }}
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.backend.probes.livenessPath }}
+              port: http
+            initialDelaySeconds: 20
+            periodSeconds: 20
+          resources:
+            {{- toYaml .Values.backend.resources | nindent 12 }}
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: gamesense-backend
+  name: {{ include "gamesense.fullname" . }}-backend
+  labels:
+    {{- include "gamesense.labels" . | nindent 4 }}
+    app.kubernetes.io/component: backend
 spec:
-  selector: { app: gamesense-backend }
+  type: {{ .Values.backend.service.type }}
+  selector:
+    {{- include "gamesense.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: backend
   ports:
     - name: http
-      port: 8000
-      targetPort: 8000
+      port: {{ .Values.backend.service.port }}
+      targetPort: http

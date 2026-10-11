@@ -1,56 +1,118 @@
+import os
 from time import perf_counter
-from typing import Literal
 
-from fastapi import FastAPI, Response
+from fastapi import Depends, FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
-from prometheus_client import CONTENT_TYPE_LATEST, Counter, Histogram, generate_latest
-from pydantic import BaseModel
+from prometheus_client import CONTENT_TYPE_LATEST, Counter, Gauge, Histogram, generate_latest
+from sqlalchemy import func, select
+from sqlalchemy.orm import Session
 
-REQUEST_COUNT = Counter("gamesense_requests_total", "Total HTTP requests served", ["route"])
-RECOMMENDATION_LATENCY = Histogram("gamesense_recommendation_seconds", "Recommendation response latency")
+from app.catalog import FIXTURE_NOTICE, MODE_EXPLANATIONS, list_active_games, recommend_games, to_game_out
+from app.db import database_is_ready, get_session
+from app.models import Game
+from app.schemas import (
+    GameOut,
+    HealthResponse,
+    ReadinessResponse,
+    RecommendationRequest,
+    RecommendationResponse,
+)
 
-app = FastAPI(title="GameSense API", version="0.1.0")
+REQUEST_COUNT = Counter(
+    "gamesense_http_requests",
+    "Total HTTP requests served by the GameSense API",
+    ["method", "route", "status_code"],
+)
+REQUEST_LATENCY = Histogram(
+    "gamesense_http_request_duration_seconds",
+    "HTTP request duration for the GameSense API",
+    ["method", "route"],
+)
+RECOMMENDATION_LATENCY = Histogram(
+    "gamesense_recommendation_seconds",
+    "Recommendation response latency for the rules-based demo endpoint",
+)
+DEMO_CATALOG_GAMES = Gauge(
+    "gamesense_demo_catalog_games",
+    "Active records in the hand-written demo fixture catalog",
+)
+
+
+def _allowed_origins() -> list[str]:
+    configured = os.getenv("CORS_ALLOWED_ORIGINS")
+    if configured:
+        return [origin.strip() for origin in configured.split(",") if origin.strip()]
+    return ["http://localhost:5173", "http://localhost:3000"]
+
+
+app = FastAPI(title="GameSense API", version="0.2.0")
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://localhost:3000"],
+    allow_origins=_allowed_origins(),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 
-class RecommendationRequest(BaseModel):
-    mode: Literal["similar", "trending", "cozy", "competitive"] = "trending"
-    favorite_game: str | None = None
-
-
-@app.get("/health")
-def health() -> dict[str, str]:
-    REQUEST_COUNT.labels(route="/health").inc()
-    return {"status": "ok", "service": "gamesense-api"}
-
-
-@app.post("/api/recommendations")
-def recommendations(payload: RecommendationRequest) -> dict[str, object]:
+@app.middleware("http")
+async def record_http_metrics(request: Request, call_next):
     start = perf_counter()
-    REQUEST_COUNT.labels(route="/api/recommendations").inc()
-    catalog = {
-        "similar": ["Hades", "Dead Cells", "Risk of Rain 2"],
-        "trending": ["Baldur's Gate 3", "Helldivers 2", "Palworld"],
-        "cozy": ["Stardew Valley", "Dave the Diver", "Spiritfarer"],
-        "competitive": ["Counter-Strike 2", "Dota 2", "Apex Legends"],
-    }
-    result = {
-        "mode": payload.mode,
-        "favoriteGame": payload.favorite_game,
-        "recommendations": catalog[payload.mode],
-        "explanation": "Starter rules-based response for local demos; replace with Steam data and model scoring in later slices.",
-    }
+    response = await call_next(request)
+    route = request.scope.get("route")
+    route_path = getattr(route, "path", request.url.path)
+    REQUEST_COUNT.labels(
+        method=request.method,
+        route=route_path,
+        status_code=str(response.status_code),
+    ).inc()
+    REQUEST_LATENCY.labels(method=request.method, route=route_path).observe(perf_counter() - start)
+    return response
+
+
+@app.get("/health", response_model=HealthResponse)
+def health() -> HealthResponse:
+    return HealthResponse(status="ok", service="gamesense-api")
+
+
+@app.get("/ready", response_model=ReadinessResponse)
+def ready(session: Session = Depends(get_session)) -> ReadinessResponse:
+    database_is_ready(session)
+    count = session.scalar(select(func.count()).select_from(Game).where(Game.is_active.is_(True))) or 0
+    DEMO_CATALOG_GAMES.set(count)
+    return ReadinessResponse(
+        status="ok",
+        service="gamesense-api",
+        database="ok",
+        demoCatalogItems=count,
+    )
+
+
+@app.get("/api/games", response_model=list[GameOut])
+def games(session: Session = Depends(get_session)) -> list[GameOut]:
+    catalog = list_active_games(session)
+    DEMO_CATALOG_GAMES.set(len(catalog))
+    return [to_game_out(game) for game in catalog]
+
+
+@app.post("/api/recommendations", response_model=RecommendationResponse)
+def recommendations(
+    payload: RecommendationRequest,
+    session: Session = Depends(get_session),
+) -> RecommendationResponse:
+    start = perf_counter()
+    recommendations = recommend_games(session, payload.mode, payload.favorite_game)
+    DEMO_CATALOG_GAMES.set(session.scalar(select(func.count()).select_from(Game).where(Game.is_active.is_(True))) or 0)
     RECOMMENDATION_LATENCY.observe(perf_counter() - start)
-    return result
+    return RecommendationResponse(
+        mode=payload.mode,
+        favoriteGame=payload.favorite_game,
+        recommendations=recommendations,
+        explanation=MODE_EXPLANATIONS[payload.mode],
+        fixtureNotice=FIXTURE_NOTICE,
+    )
 
 
 @app.get("/metrics")
 def metrics() -> Response:
-    REQUEST_COUNT.labels(route="/metrics").inc()
     return Response(generate_latest(), media_type=CONTENT_TYPE_LATEST)

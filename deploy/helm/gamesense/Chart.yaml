@@ -1,5 +1,6 @@
 apiVersion: v2
 name: gamesense
-version: 0.1.0
-appVersion: 0.1.0
 description: GameSense application chart for the M10 GitOps walkthrough.
+type: application
+version: 0.2.0
+appVersion: 0.2.0

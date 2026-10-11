@@ -1,0 +1,74 @@
+from pathlib import Path
+import sys
+
+from alembic import command
+from alembic.config import Config
+from fastapi.testclient import TestClient
+from sqlalchemy import create_engine, text
+from sqlalchemy.orm import sessionmaker
+
+BACKEND_ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(BACKEND_ROOT))
+
+from app.db import get_session  # noqa: E402
+from app.main import app  # noqa: E402
+
+
+def run_migrations(database_url: str) -> None:
+    config = Config(str(BACKEND_ROOT / "alembic.ini"))
+    config.set_main_option("script_location", str(BACKEND_ROOT / "alembic"))
+    config.set_main_option("sqlalchemy.url", database_url)
+    command.upgrade(config, "head")
+
+
+def build_test_client(tmp_path: Path) -> TestClient:
+    database_url = f"sqlite:///{tmp_path / 'gamesense-test.db'}"
+    run_migrations(database_url)
+    engine = create_engine(database_url, connect_args={"check_same_thread": False}, future=True)
+    testing_session = sessionmaker(bind=engine, autoflush=False, autocommit=False, future=True)
+
+    def override_get_session():
+        with testing_session() as session:
+            yield session
+
+    app.dependency_overrides[get_session] = override_get_session
+    return TestClient(app)
+
+
+def test_alembic_migration_creates_labeled_demo_fixtures(tmp_path: Path) -> None:
+    database_url = f"sqlite:///{tmp_path / 'migration-test.db'}"
+    run_migrations(database_url)
+    engine = create_engine(database_url, future=True)
+
+    with engine.connect() as connection:
+        rows = connection.execute(text("SELECT slug, source FROM demo_games ORDER BY slug")).mappings().all()
+
+    assert len(rows) >= 6
+    assert {row["source"] for row in rows} == {"demo-fixture"}
+
+
+def test_recommendations_come_from_demo_database_fixtures(tmp_path: Path) -> None:
+    client = build_test_client(tmp_path)
+
+    response = client.post(
+        "/api/recommendations",
+        json={"mode": "cozy", "favorite_game": "Cozy Comet Cafe"},
+    )
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["mode"] == "cozy"
+    assert payload["favoriteGame"] == "Cozy Comet Cafe"
+    assert "Demo fixture catalog only" in payload["fixtureNotice"]
+    assert len(payload["recommendations"]) >= 2
+    assert {game["source"] for game in payload["recommendations"]} == {"demo-fixture"}
+
+
+def test_readiness_checks_database_and_counts_catalog(tmp_path: Path) -> None:
+    client = build_test_client(tmp_path)
+
+    response = client.get("/ready")
+
+    assert response.status_code == 200
+    assert response.json()["database"] == "ok"
+    assert response.json()["demoCatalogItems"] >= 6
