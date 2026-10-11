@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gamesense-frontend
+spec:
+  replicas: {{ .Values.frontend.replicas }}
+  selector:
+    matchLabels: { app: gamesense-frontend }
+  template:
+    metadata:
+      labels: { app: gamesense-frontend }
+    spec:
+      containers:
+        - name: frontend
+          image: {{ .Values.frontend.image }}
+          ports: [{ containerPort: 80 }]
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: gamesense-frontend
+spec:
+  selector: { app: gamesense-frontend }
+  ports:
+    - name: http
+      port: 80
+      targetPort: 80
