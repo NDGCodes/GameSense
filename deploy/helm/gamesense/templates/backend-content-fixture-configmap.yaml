@@ -1,0 +1,17 @@
+{{- if and .Values.backend.recommender.contentFixture.configMap.create (eq .Values.backend.recommender.mode "content") }}
+{{- $fixture := .Files.Get .Values.backend.recommender.contentFixture.chartFile -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ default (printf "%s-content-fixture" (include "gamesense.fullname" .)) .Values.backend.recommender.contentFixture.configMap.name | quote }}
+  labels:
+    {{- include "gamesense.labels" . | nindent 4 }}
+    app.kubernetes.io/component: backend
+    gamesense.io/artifact-type: recommender-content-fixture
+  annotations:
+    gamesense.io/artifact-path: {{ .Values.backend.recommender.contentFixture.mountPath | quote }}
+    gamesense.io/artifact-sha256: {{ sha256sum $fixture | quote }}
+data:
+  {{ .Values.backend.recommender.contentFixture.fileName }}: |
+{{ $fixture | indent 4 }}
+{{- end }}

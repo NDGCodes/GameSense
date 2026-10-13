@@ -24,6 +24,22 @@ backend:
   env:
     GAMESENSE_ENV: kubernetes
     CORS_ALLOWED_ORIGINS: https://gamesense.example.com,http://localhost:5173,http://localhost:3000
+  recommender:
+    # Keep fixture mode as the deployment default. Set to "content" only for a
+    # clearly labeled baseline smoke deployment; it uses the self-authored sample
+    # fixture below and does not claim real-catalog or production performance.
+    mode: fixture
+    contentFixture:
+      # Path consumed by backend/app/recommender_service.py when mode is "content".
+      mountPath: /app/data/fixtures/ml/sample_games.self-authored.json
+      fileName: sample_games.self-authored.json
+      chartFile: artifacts/sample_games.self-authored.json
+      configMap:
+        # When mode is "content", create and mount a ConfigMap containing the
+        # committed self-authored sample fixture. Disable only if the image or an
+        # externally managed volume already provides mountPath.
+        create: true
+        name: ""
   database:
     # Optional: create a Kubernetes Secret separately and set its name here.
     # The secret value should be a SQLAlchemy DATABASE_URL such as postgresql+pg8000://...
