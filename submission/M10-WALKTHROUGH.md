@@ -53,13 +53,15 @@ Use this file while preparing the final submission. Do not mark cloud, cluster, 
 - Training, serving, or tuning recommendation models.
 - Claiming production readiness, live cluster health, or monitoring evidence from local-only validation.
 
-## Milestone 7 local validation log
+## Milestone 8 local evidence freeze
 
-Record only commands that were actually run for this branch. Current local validation from this worktree:
+Record only commands that were actually run for this branch. Current local validation from this worktree is summarized in `docs/m8-final-local-evidence.md`; raw artifacts are outside the repository at `/Users/nishantdasgupta/Documents/ML_Ops/firstmate/data/gamesense-ml-m8-evidence/`.
 
-- Passed: `helm lint deploy/helm/gamesense` (`1 chart(s) linted, 0 chart(s) failed`).
-- Passed: `helm template gamesense deploy/helm/gamesense >/Users/nishantdasgupta/Documents/ML_Ops/firstmate/data/gamesense-ml-m7-submission/helm-template-default.yaml`.
-- Passed: `helm template gamesense-content deploy/helm/gamesense --set backend.recommender.mode=content >/Users/nishantdasgupta/Documents/ML_Ops/firstmate/data/gamesense-ml-m7-submission/helm-template-content.yaml`.
+- Passed: backend tests with Python 3.10.13 (`26 passed, 1 warning`) using the committed requirements.
+- Passed: frontend `npm ci` and `npm run build`.
 - Passed: `docker compose config --quiet`.
-- Passed: `cd backend && PYTHONPATH=. /Users/nishantdasgupta/Documents/ML_Ops/firstmate/data/gamesense-ml-m7-submission/venv310/bin/pytest -q` with Python 3.10.13 (`26 passed, 1 warning in 5.39s`).
-- Passed: `git diff --check`.
+- Passed: `docker compose --profile content-smoke run --rm content-smoke` while Docker resources were available.
+- Passed: `helm lint deploy/helm/gamesense` and default/content `helm template` renders.
+- Passed: `terraform -chdir=infra/terraform fmt -check -recursive`, `terraform -chdir=infra/terraform init -backend=false`, and `terraform -chdir=infra/terraform validate`.
+- Not run and not claimed: real dataset download/ingest, Kaggle real-data execution, model training/fine-tuning, accuracy tuning, `terraform plan`, `terraform apply`, AWS/EKS provisioning, live Kubernetes/GitOps/Prometheus/Grafana verification, or production deployment.
+- Python 3.14 failure causes are unverified; the local evidence bundle supports Python 3.10.13 for these checks and documents Python 3.11 as the intended supported development target.
