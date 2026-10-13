@@ -62,6 +62,10 @@ python -m app.ml_pipeline normalize --manifest ../data/source-manifests/example.
 python -m app.ml_pipeline validate --manifest ../data/source-manifests/example.self-authored.json --normalized /tmp/gamesense-ml-m2/normalized.json --output /tmp/gamesense-ml-m2/validation.json
 python -m app.ml_pipeline manifest --manifest ../data/source-manifests/example.self-authored.json --normalized /tmp/gamesense-ml-m2/normalized.json --validation-report /tmp/gamesense-ml-m2/validation.json --output /tmp/gamesense-ml-m2/pipeline-manifest.json
 
+# Milestone 4 offline evaluation for the local baseline recommender
+python -m app.ml_evaluation
+python -m app.ml_evaluation --output /tmp/gamesense-ml-m4/evaluation.json
+
 # Frontend build
 cd frontend
 npm ci
@@ -104,6 +108,7 @@ Implemented in this slice:
 - [x] Helm chart and Argo CD GitOps manifest.
 - [x] Prometheus metrics and Grafana dashboard starter.
 - [x] Submission walkthrough checklist that separates local evidence from cloud evidence.
+- [x] Local baseline recommender and offline smoke evaluation/model card for the tiny self-authored fixture.
 
 Deferred until the later authorized phases:
 
