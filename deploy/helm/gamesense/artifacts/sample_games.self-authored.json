@@ -1,0 +1,21 @@
+{
+  "fixtureId": "gamesense-ml-self-authored-smoke-v1",
+  "description": "Tiny self-authored game records for future ML pipeline parser tests; not external catalog data.",
+  "source": "self-authored-fixture",
+  "records": [
+    {
+      "id": "fixture-moonlit-market",
+      "title": "Moonlit Market",
+      "description": "A cozy night-market management game about arranging stalls, trading recipes, and helping neighbors.",
+      "genres": ["Cozy", "Management"],
+      "tags": ["relaxing", "crafting", "single-player"]
+    },
+    {
+      "id": "fixture-orbit-runners",
+      "title": "Orbit Runners",
+      "description": "A cooperative platformer where pilots repair asteroid relay stations under a gentle time limit.",
+      "genres": ["Action", "Co-op"],
+      "tags": ["space", "teamwork", "platforming"]
+    }
+  ]
+}

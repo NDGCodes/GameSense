@@ -1,29 +1,39 @@
 {
   "title": "GameSense Application Metrics",
   "schemaVersion": 39,
-  "version": 2,
+  "version": 3,
   "refresh": "15s",
-  "tags": ["gamesense", "demo-fixture"],
+  "tags": ["gamesense", "demo-fixture", "content-recommender"],
   "panels": [
     {
       "type": "stat",
       "title": "Recommendation Requests",
       "targets": [
         {
-          "expr": "sum(gamesense_http_requests_total{route=\"/api/recommendations\"})"
+          "expr": "sum(gamesense_recommendation_requests_total)"
         }
       ],
-      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 0 }
+      "gridPos": { "h": 8, "w": 6, "x": 0, "y": 0 }
     },
     {
       "type": "stat",
-      "title": "Demo Catalog Items",
+      "title": "Recommendation Catalog Items",
       "targets": [
         {
-          "expr": "max(gamesense_demo_catalog_games)"
+          "expr": "max(gamesense_recommendation_catalog_items)"
         }
       ],
-      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 0 }
+      "gridPos": { "h": 8, "w": 6, "x": 6, "y": 0 }
+    },
+    {
+      "type": "stat",
+      "title": "Recommendation Fallbacks",
+      "targets": [
+        {
+          "expr": "sum(gamesense_recommendation_fallbacks_total)"
+        }
+      ],
+      "gridPos": { "h": 8, "w": 6, "x": 12, "y": 0 }
     },
     {
       "type": "timeseries",
@@ -33,7 +43,27 @@
           "expr": "histogram_quantile(0.95, sum(rate(gamesense_recommendation_seconds_bucket[5m])) by (le))"
         }
       ],
-      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 0 }
+      "gridPos": { "h": 8, "w": 6, "x": 18, "y": 0 }
+    },
+    {
+      "type": "timeseries",
+      "title": "Recommendation Requests by Mode and Version",
+      "targets": [
+        {
+          "expr": "sum by (mode, algorithm, version) (rate(gamesense_recommendation_requests_total[5m]))"
+        }
+      ],
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 }
+    },
+    {
+      "type": "timeseries",
+      "title": "Recommendation Fallbacks by Reason",
+      "targets": [
+        {
+          "expr": "sum by (reason, algorithm) (rate(gamesense_recommendation_fallbacks_total[5m]))"
+        }
+      ],
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 }
     },
     {
       "type": "timeseries",
@@ -43,7 +73,7 @@
           "expr": "sum by (route, status_code) (rate(gamesense_http_requests_total[5m]))"
         }
       ],
-      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 8 }
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 16 }
     }
   ]
 }

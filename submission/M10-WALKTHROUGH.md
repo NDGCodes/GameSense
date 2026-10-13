@@ -1,8 +1,8 @@
 # M10 Walkthrough and Evidence Checklist
 
-Use this file while preparing the final submission. Do not mark cloud, cluster, monitoring, or video evidence complete until it has been verified in the target environment.
+Use this file while preparing the final submission. Do not mark cloud, cluster, monitoring, or video evidence complete until it has been verified in the target environment. This checklist separates evidence verified from local repository commands from cloud/deployment evidence that has not been performed in this branch.
 
-## What this repository slice can prove locally
+## Verified local evidence this repository can produce
 
 - Codebase tour: show `frontend/`, `backend/`, `infra/terraform/`, `deploy/helm/`, `deploy/gitops/`, `observability/`, and `submission/`.
 - Backend migration/test path: run `cd backend && python -m venv .venv && source .venv/bin/activate && python -m pip install -r requirements.txt -r requirements-dev.txt && pytest -q`.
@@ -16,10 +16,13 @@ Use this file while preparing the final submission. Do not mark cloud, cluster, 
 - Local observability smoke checks after Compose starts:
   - Prometheus at http://localhost:9090 can scrape `gamesense-backend-local`.
   - Grafana at http://localhost:3000 loads the GameSense dashboard from provisioning.
-- Helm static validation: run `helm lint deploy/helm/gamesense` and `helm template gamesense deploy/helm/gamesense`.
+- Helm static validation: run `helm lint deploy/helm/gamesense`, `helm template gamesense deploy/helm/gamesense`, and `helm template gamesense-content deploy/helm/gamesense --set backend.recommender.mode=content`.
+  - The default rendered chart keeps `RECOMMENDER_MODE=fixture`.
+  - The content render sets `RECOMMENDER_MODE=content`, sets `CONTENT_FIXTURE_PATH=/app/data/fixtures/ml/sample_games.self-authored.json`, and mounts only the committed self-authored sample fixture from the chart artifact ConfigMap. The ConfigMap is annotated with the fixture path and SHA-256 checksum for review, but the backend does not enforce checksum verification at runtime.
+- Kaggle-compatible notebook smoke path: `notebooks/gamesense_baseline_kaggle.ipynb` runs the local baseline recommender and offline evaluation against `data/fixtures/ml/sample_games.self-authored.json` by default. This default is self-authored sample data only; it does not download Kaggle datasets, train or fine-tune a model, generate embeddings, or prove real-catalog accuracy.
 - Terraform static validation: run `terraform -chdir=infra/terraform fmt -check -recursive`, `terraform -chdir=infra/terraform init -backend=false`, and `terraform -chdir=infra/terraform validate`.
 
-## Evidence that still requires real external setup
+## Evidence that still requires real external setup and has not been performed here
 
 - GitHub Actions run on the pushed branch/PR, including backend tests, frontend build, Compose config, Terraform validate, Helm lint/render, Docker image build, and Trivy scan.
 - GHCR image publishing from a push to `main` after review/merge.
@@ -31,6 +34,7 @@ Use this file while preparing the final submission. Do not mark cloud, cluster, 
 - A configured `DATABASE_URL` Secret or a consciously accepted ephemeral SQLite demo mode for the cluster walkthrough.
 - Prometheus target confirmed `UP` in the deployed environment.
 - Grafana dashboard populated with live request and latency metrics from the deployed backend.
+- Kaggle or other external real-data run: first identify a specific data source, document its manifest, license, terms, redistribution/training/serving permissions, and approval status, then run the existing source-check/license gates. No real-data Kaggle run is claimed by this branch.
 - Submission video/slides that show only evidence actually captured from the environment being claimed.
 
 ## External prerequisites
@@ -45,5 +49,17 @@ Use this file while preparing the final submission. Do not mark cloud, cluster, 
 ## Out-of-scope for this phase
 
 - Downloading Steam or other third-party datasets before license and usage terms are verified.
+- Running the Kaggle notebook on unapproved attached data.
 - Training, serving, or tuning recommendation models.
 - Claiming production readiness, live cluster health, or monitoring evidence from local-only validation.
+
+## Milestone 7 local validation log
+
+Record only commands that were actually run for this branch. Current local validation from this worktree:
+
+- Passed: `helm lint deploy/helm/gamesense` (`1 chart(s) linted, 0 chart(s) failed`).
+- Passed: `helm template gamesense deploy/helm/gamesense >/Users/nishantdasgupta/Documents/ML_Ops/firstmate/data/gamesense-ml-m7-submission/helm-template-default.yaml`.
+- Passed: `helm template gamesense-content deploy/helm/gamesense --set backend.recommender.mode=content >/Users/nishantdasgupta/Documents/ML_Ops/firstmate/data/gamesense-ml-m7-submission/helm-template-content.yaml`.
+- Passed: `docker compose config --quiet`.
+- Passed: `cd backend && PYTHONPATH=. /Users/nishantdasgupta/Documents/ML_Ops/firstmate/data/gamesense-ml-m7-submission/venv310/bin/pytest -q` with Python 3.10.13 (`26 passed, 1 warning in 5.39s`).
+- Passed: `git diff --check`.

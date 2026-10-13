@@ -54,14 +54,19 @@ function App() {
       <button onClick={loadRecommendations}>Get recommendations</button>
       {error && <p className="error">{error}</p>}
       {result && <div className="results">
-        <p className="notice">{result.fixtureNotice}</p>
+        <p className="notice">{result.disclosure || result.fixtureNotice}</p>
+        <div className="metadata" aria-label="Recommendation source metadata">
+          <span>Algorithm: {result.algorithm || 'demo-fixture-rules'}</span>
+          <span>Version: {result.version || 'legacy'}</span>
+          <span>Data snapshot: {result.dataSnapshot || 'demo-database-fixtures'}</span>
+        </div>
         <p>{result.explanation}</p>
         <div className="cards">
           {result.recommendations.map(game => <article key={game.slug}>
             <div className="card-header"><h2>{game.title}</h2><span>{game.source}</span></div>
             <p>{game.shortDescription}</p>
             <p className="genres">{game.genres.join(' · ')}</p>
-            <p>{game.reason}</p>
+            <p className="reason"><strong>Why this appears:</strong> {game.reason}</p>
           </article>)}
         </div>
       </div>}

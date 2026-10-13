@@ -18,6 +18,9 @@ spec:
         app.kubernetes.io/component: backend
       annotations:
         {{- toYaml .Values.backend.podAnnotations | nindent 8 }}
+        {{- if and .Values.backend.recommender.contentFixture.configMap.create (eq .Values.backend.recommender.mode "content") }}
+        checksum/content-fixture: {{ .Files.Get .Values.backend.recommender.contentFixture.chartFile | sha256sum | quote }}
+        {{- end }}
     spec:
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
@@ -32,6 +35,10 @@ spec:
               value: {{ .Values.backend.env.GAMESENSE_ENV | quote }}
             - name: CORS_ALLOWED_ORIGINS
               value: {{ .Values.backend.env.CORS_ALLOWED_ORIGINS | quote }}
+            - name: RECOMMENDER_MODE
+              value: {{ .Values.backend.recommender.mode | quote }}
+            - name: CONTENT_FIXTURE_PATH
+              value: {{ .Values.backend.recommender.contentFixture.mountPath | quote }}
             {{- if .Values.backend.database.urlSecretName }}
             - name: DATABASE_URL
               valueFrom:
@@ -56,6 +63,19 @@ spec:
             periodSeconds: 20
           resources:
             {{- toYaml .Values.backend.resources | nindent 12 }}
+          {{- if and .Values.backend.recommender.contentFixture.configMap.create (eq .Values.backend.recommender.mode "content") }}
+          volumeMounts:
+            - name: content-fixture
+              mountPath: {{ .Values.backend.recommender.contentFixture.mountPath | quote }}
+              subPath: {{ .Values.backend.recommender.contentFixture.fileName | quote }}
+              readOnly: true
+          {{- end }}
+      {{- if and .Values.backend.recommender.contentFixture.configMap.create (eq .Values.backend.recommender.mode "content") }}
+      volumes:
+        - name: content-fixture
+          configMap:
+            name: {{ default (printf "%s-content-fixture" (include "gamesense.fullname" .)) .Values.backend.recommender.contentFixture.configMap.name | quote }}
+      {{- end }}
 ---
 apiVersion: v1
 kind: Service

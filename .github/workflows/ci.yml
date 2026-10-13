@@ -31,6 +31,11 @@ jobs:
           python -m pip install -r requirements.txt -r requirements-dev.txt
           pytest -q
 
+      - name: ML data-pipeline and recommender focused tests
+        run: |
+          cd backend
+          pytest -q tests/test_ml_pipeline.py tests/test_recommender.py tests/test_api.py
+
       - name: Frontend build
         run: |
           cd frontend
@@ -39,6 +44,9 @@ jobs:
 
       - name: Docker Compose config check
         run: docker compose config --quiet
+
+      - name: Docker Compose content recommender smoke test
+        run: docker compose --profile content-smoke run --rm content-smoke
 
       - uses: hashicorp/setup-terraform@v3
         with:

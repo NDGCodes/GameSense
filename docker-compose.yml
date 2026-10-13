@@ -21,8 +21,11 @@ services:
       DATABASE_URL: postgresql+pg8000://gamesense:gamesense@db:5432/gamesense
       GAMESENSE_ENV: local
       CORS_ALLOWED_ORIGINS: http://localhost:5173,http://localhost:3000
+      CONTENT_FIXTURE_PATH: /app/data/fixtures/ml/sample_games.self-authored.json
     ports:
       - "8000:8000"
+    volumes:
+      - ./data:/app/data:ro
     depends_on:
       db:
         condition: service_healthy
@@ -32,6 +35,22 @@ services:
       timeout: 5s
       retries: 6
       start_period: 20s
+
+  content-smoke:
+    profiles: ["content-smoke"]
+    build: ./backend
+    environment:
+      RECOMMENDER_MODE: content
+      CONTENT_FIXTURE_PATH: /app/data/fixtures/ml/sample_games.self-authored.json
+    volumes:
+      - ./data:/app/data:ro
+    command: >
+      python -c "from app.recommender_service import recommend_for_api;
+      result = recommend_for_api(None, mode='cozy', favorite_game='Moonlit Market');
+      assert result.algorithm == 'content-baseline-rrf';
+      assert result.catalogItems == 2;
+      assert result.recommendations and result.recommendations[0].source == 'gamesense-self-authored-smoke-fixture';
+      print('content recommender smoke passed')"
 
   frontend:
     build: ./frontend
