@@ -6,9 +6,11 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Literal
 
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.catalog import FIXTURE_NOTICE, MODE_EXPLANATIONS, recommend_games
+from app.models import Game
 from app.recommender import BASELINE_RECOMMENDER_VERSION, BaselineRecommendationMode, recommend_baseline
 from app.schemas import CatalogGameSchema, GameOut, RecommendationMode
 
@@ -25,7 +27,9 @@ CONTENT_DISCLOSURE = (
 )
 
 _REPO_ROOT = Path(__file__).resolve().parents[2]
-_CONTENT_FIXTURE = _REPO_ROOT / "data/fixtures/ml/sample_games.self-authored.json"
+_CONTENT_FIXTURE = Path(
+    os.getenv("CONTENT_FIXTURE_PATH", str(_REPO_ROOT / "data/fixtures/ml/sample_games.self-authored.json"))
+)
 _SOURCE_ID = "gamesense-self-authored-smoke-fixture"
 
 
@@ -38,6 +42,8 @@ class RecommendationServiceResult:
     version: str
     dataSnapshot: str
     disclosure: str
+    catalogItems: int
+    fallbackReason: str = "none"
 
 
 def get_recommender_mode() -> RecommenderMode:
@@ -72,6 +78,7 @@ def _fixture_recommendations(
         version=FIXTURE_VERSION,
         dataSnapshot=FIXTURE_DATA_SNAPSHOT,
         disclosure=FIXTURE_NOTICE,
+        catalogItems=session.scalar(select(func.count()).select_from(Game).where(Game.is_active.is_(True))) or 0,
     )
 
 
@@ -107,10 +114,12 @@ def _content_recommendations(
 ) -> RecommendationServiceResult:
     games = _load_content_games()
     seed_slug = _resolve_seed_slug(games, favorite_game)
+    fallback_reason = "similar_seed_not_found" if mode == "similar" and favorite_game and not seed_slug else "none"
     baseline_mode = _to_baseline_mode(mode, seed_slug)
     ranked = recommend_baseline(games, mode=baseline_mode, seed_slug=seed_slug, limit=limit)
 
     if not ranked and mode == "similar":
+        fallback_reason = "similar_no_candidates"
         baseline_mode = "cozy"
         ranked = recommend_baseline(games, mode=baseline_mode, limit=limit)
 
@@ -123,6 +132,8 @@ def _content_recommendations(
         version=BASELINE_RECOMMENDER_VERSION,
         dataSnapshot=CONTENT_DATA_SNAPSHOT,
         disclosure=CONTENT_DISCLOSURE,
+        catalogItems=len([game for game in games if game.isActive]),
+        fallbackReason=fallback_reason,
     )
 
 

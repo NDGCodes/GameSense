@@ -31,7 +31,27 @@ REQUEST_LATENCY = Histogram(
 )
 RECOMMENDATION_LATENCY = Histogram(
     "gamesense_recommendation_seconds",
-    "Recommendation response latency for the rules-based demo endpoint",
+    "Recommendation response latency for the recommendation endpoint",
+)
+RECOMMENDATION_REQUESTS = Counter(
+    "gamesense_recommendation_requests",
+    "Recommendation endpoint requests by bounded recommender metadata",
+    ["mode", "algorithm", "version", "data_snapshot"],
+)
+RECOMMENDATION_FALLBACKS = Counter(
+    "gamesense_recommendation_fallbacks",
+    "Recommendation fallbacks by bounded reason and target algorithm",
+    ["reason", "algorithm"],
+)
+RECOMMENDATION_MODEL_INFO = Gauge(
+    "gamesense_recommendation_model_info",
+    "Static info gauge for the active recommendation algorithm and version",
+    ["algorithm", "version", "data_snapshot"],
+)
+RECOMMENDATION_CATALOG_ITEMS = Gauge(
+    "gamesense_recommendation_catalog_items",
+    "Catalog items visible to the active recommendation mode",
+    ["algorithm", "data_snapshot"],
 )
 DEMO_CATALOG_GAMES = Gauge(
     "gamesense_demo_catalog_games",
@@ -103,7 +123,22 @@ def recommendations(
 ) -> RecommendationResponse:
     start = perf_counter()
     result = recommend_for_api(session, mode=payload.mode, favorite_game=payload.favorite_game)
-    DEMO_CATALOG_GAMES.set(session.scalar(select(func.count()).select_from(Game).where(Game.is_active.is_(True))) or 0)
+    demo_catalog_count = session.scalar(select(func.count()).select_from(Game).where(Game.is_active.is_(True))) or 0
+    DEMO_CATALOG_GAMES.set(demo_catalog_count)
+    RECOMMENDATION_CATALOG_ITEMS.labels(algorithm=result.algorithm, data_snapshot=result.dataSnapshot).set(result.catalogItems)
+    RECOMMENDATION_MODEL_INFO.labels(
+        algorithm=result.algorithm,
+        version=result.version,
+        data_snapshot=result.dataSnapshot,
+    ).set(1)
+    RECOMMENDATION_REQUESTS.labels(
+        mode=payload.mode,
+        algorithm=result.algorithm,
+        version=result.version,
+        data_snapshot=result.dataSnapshot,
+    ).inc()
+    if result.fallbackReason != "none":
+        RECOMMENDATION_FALLBACKS.labels(reason=result.fallbackReason, algorithm=result.algorithm).inc()
     RECOMMENDATION_LATENCY.observe(perf_counter() - start)
     return RecommendationResponse(
         mode=payload.mode,

@@ -36,6 +36,8 @@ Result: `5 passed in 0.09s`.
 
 Milestone 4 adds an offline evaluation CLI and model card in `backend/app/ml_evaluation.py` and `docs/ml-baseline-model-card.md`. The evaluation is a deterministic smoke check over the tiny self-authored fixture and clearly labeled synthetic vector inputs; it is not evidence of real-catalog or user-interaction recommendation quality.
 
+Milestone 6 adds local container and observability support for the integrated content path. `docker compose --profile content-smoke run --rm content-smoke` exercises `RECOMMENDER_MODE=content` against `data/fixtures/ml/sample_games.self-authored.json` without external data. The API emits bounded Prometheus metrics for recommendation requests, content/fixture fallbacks, model algorithm/version/snapshot metadata, and catalog item counts. Metric labels must stay low-cardinality and must not include favorite-game text, user identifiers, secrets, request bodies, or any external dataset identifiers beyond approved source snapshot names.
+
 The full backend test suite passed locally in a Python 3.10 virtual environment with:
 
 ```bash
