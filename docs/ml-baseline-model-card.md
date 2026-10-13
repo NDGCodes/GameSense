@@ -6,7 +6,7 @@
 - **Version:** `gamesense-local-baseline-recommender-v1`
 - **Offline evaluation CLI:** `python -m app.ml_evaluation`
 - **Evaluation report version:** `gamesense-baseline-offline-eval-v1`
-- **Status:** Local baseline only; not wired into the API or frontend serving path.
+- **Status:** Local baseline only. It can be selected for the app recommendation endpoint with `RECOMMENDER_MODE=content`; fixture mode remains the default serving path.
 
 ## Intended use
 
@@ -51,7 +51,7 @@ The evaluation **does not** support claims about real-world recommendation quali
 - No model training, fine-tuning, generated embeddings, model weights, or learned parameters are produced.
 - The fixture has only two fictional records, so metrics are smoke checks rather than statistically meaningful estimates.
 - Synthetic vectors are hand-authored test inputs and are not evidence that any embedding model performs well.
-- API/frontend serving behavior is unchanged; this component is not a production recommender.
+- API/frontend serving can expose this component only as a labeled content baseline via `RECOMMENDER_MODE=content`; it is not a production recommender.
 
 ## Validation performed
 
