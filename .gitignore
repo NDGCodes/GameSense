@@ -12,4 +12,21 @@ dist/
 *.tfplan
 *.plan
 .terraform/
+
+# ML/data safeguards: keep real datasets and generated artifacts local.
+/data/raw/
+/data/external/
+/data/interim/
+/data/processed/
+/artifacts/models/
+/models/
+*.onnx
+*.pt
+*.pth
+*.pkl
+*.joblib
+*.npy
+*.npz
+
+# Tiny intentional fixtures and source manifests remain trackable under data/fixtures/ and data/source-manifests/.
 .DS_Store

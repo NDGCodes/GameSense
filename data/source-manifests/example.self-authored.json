@@ -1,0 +1,48 @@
+{
+  "manifestVersion": 1,
+  "sourceId": "gamesense-self-authored-smoke-fixture",
+  "name": "GameSense self-authored ML smoke-test fixture",
+  "provenance": {
+    "origin": "Created in this repository for Milestone 0 scaffolding.",
+    "sourceType": "self-authored",
+    "collectedBy": "GameSense maintainers",
+    "collectionMethod": "Hand-written fictional records; no external dataset was downloaded or copied.",
+    "notes": "Use as a manifest shape example and for tiny future parser tests only."
+  },
+  "licenseAndTerms": {
+    "licenseName": "Project-owned self-authored fixture",
+    "termsUrl": null,
+    "redistributionAllowed": true,
+    "trainingAllowed": true,
+    "commercialUseAllowed": true,
+    "uncertainties": []
+  },
+  "attribution": {
+    "required": false,
+    "text": "Self-authored GameSense fixture; no external attribution required."
+  },
+  "allowedUses": {
+    "commitToRepository": true,
+    "localDevelopment": true,
+    "ci": true,
+    "training": false,
+    "evaluation": true,
+    "serving": false,
+    "notes": "Tiny fixture is suitable for parser/evaluation smoke tests, not model quality claims or production serving."
+  },
+  "retrieval": {
+    "retrievedAt": "2025-10-11T00:00:00Z",
+    "version": "v1",
+    "uri": "data/fixtures/ml/sample_games.self-authored.json",
+    "contentHash": {
+      "algorithm": "sha256",
+      "value": "7bdc6bfeee54e01ada92be2b676237c643f413f642bd4598914032573ac571bd"
+    }
+  },
+  "review": {
+    "state": "approved",
+    "reviewedBy": "GameSense maintainers",
+    "reviewedAt": "2025-10-11T00:00:00Z",
+    "notes": "Approved only because the fixture is self-authored and intentionally tiny. External sources still require separate review."
+  }
+}

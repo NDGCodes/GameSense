@@ -1,0 +1,101 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://gamesense.example/schemas/source-manifest.schema.json",
+  "title": "GameSense ML source manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "manifestVersion",
+    "sourceId",
+    "name",
+    "provenance",
+    "licenseAndTerms",
+    "attribution",
+    "allowedUses",
+    "retrieval",
+    "review"
+  ],
+  "properties": {
+    "manifestVersion": { "type": "integer", "const": 1 },
+    "sourceId": { "type": "string", "pattern": "^[a-z0-9][a-z0-9._-]*$" },
+    "name": { "type": "string", "minLength": 1 },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["origin", "sourceType", "collectedBy", "collectionMethod"],
+      "properties": {
+        "origin": { "type": "string", "minLength": 1 },
+        "sourceType": { "enum": ["self-authored", "public-dataset", "api", "scrape", "vendor", "other"] },
+        "collectedBy": { "type": "string", "minLength": 1 },
+        "collectionMethod": { "type": "string", "minLength": 1 },
+        "notes": { "type": "string" }
+      }
+    },
+    "licenseAndTerms": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["licenseName", "termsUrl", "redistributionAllowed", "trainingAllowed", "commercialUseAllowed", "uncertainties"],
+      "properties": {
+        "licenseName": { "type": "string", "minLength": 1 },
+        "termsUrl": { "type": ["string", "null"] },
+        "redistributionAllowed": { "type": "boolean" },
+        "trainingAllowed": { "type": "boolean" },
+        "commercialUseAllowed": { "type": "boolean" },
+        "uncertainties": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "attribution": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["required", "text"],
+      "properties": {
+        "required": { "type": "boolean" },
+        "text": { "type": "string" }
+      }
+    },
+    "allowedUses": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["commitToRepository", "localDevelopment", "ci", "training", "evaluation", "serving"],
+      "properties": {
+        "commitToRepository": { "type": "boolean" },
+        "localDevelopment": { "type": "boolean" },
+        "ci": { "type": "boolean" },
+        "training": { "type": "boolean" },
+        "evaluation": { "type": "boolean" },
+        "serving": { "type": "boolean" },
+        "notes": { "type": "string" }
+      }
+    },
+    "retrieval": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["retrievedAt", "version", "uri", "contentHash"],
+      "properties": {
+        "retrievedAt": { "type": "string" },
+        "version": { "type": "string", "minLength": 1 },
+        "uri": { "type": ["string", "null"] },
+        "contentHash": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["algorithm", "value"],
+          "properties": {
+            "algorithm": { "enum": ["sha256"] },
+            "value": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+          }
+        }
+      }
+    },
+    "review": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["state", "reviewedBy", "reviewedAt", "notes"],
+      "properties": {
+        "state": { "enum": ["draft", "needs-legal-review", "approved", "rejected"] },
+        "reviewedBy": { "type": ["string", "null"] },
+        "reviewedAt": { "type": ["string", "null"] },
+        "notes": { "type": "string" }
+      }
+    }
+  }
+}
