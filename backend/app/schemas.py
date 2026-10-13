@@ -25,6 +25,10 @@ class RecommendationResponse(BaseModel):
     recommendations: list[GameOut]
     explanation: str
     fixtureNotice: str
+    algorithm: str
+    version: str
+    dataSnapshot: str
+    disclosure: str
 
 
 class HealthResponse(BaseModel):

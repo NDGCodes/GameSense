@@ -1,6 +1,6 @@
 # Milestone 3 local baseline recommender
 
-This milestone adds an isolated local recommender module at `backend/app/recommender.py`. It is intentionally not wired into the API or frontend yet.
+This milestone added an isolated local recommender module at `backend/app/recommender.py`. Milestone 5 can now expose it through the app when `RECOMMENDER_MODE=content`; the fixture recommender remains the default for backward compatibility.
 
 ## Scope
 
@@ -19,7 +19,7 @@ Not implemented in this milestone:
 
 - Downloading model weights, training an encoder, or generating real catalog embeddings.
 - External catalog acquisition or use of data beyond the existing self-authored sample fixture.
-- API/frontend serving integration, deployment, or later ML milestones.
+- Deployment or later ML milestones.
 
 Dense vectors are treated as caller-owned precomputed inputs. Unit tests use clearly named synthetic vectors only to make deterministic assertions; they are not represented as model output.
 

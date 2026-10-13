@@ -7,9 +7,10 @@ from prometheus_client import CONTENT_TYPE_LATEST, Counter, Gauge, Histogram, ge
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
-from app.catalog import FIXTURE_NOTICE, MODE_EXPLANATIONS, list_active_games, recommend_games, to_game_out
+from app.catalog import list_active_games, to_game_out
 from app.db import database_is_ready, get_session
 from app.models import Game
+from app.recommender_service import recommend_for_api
 from app.schemas import (
     GameOut,
     HealthResponse,
@@ -101,15 +102,19 @@ def recommendations(
     session: Session = Depends(get_session),
 ) -> RecommendationResponse:
     start = perf_counter()
-    recommendations = recommend_games(session, payload.mode, payload.favorite_game)
+    result = recommend_for_api(session, mode=payload.mode, favorite_game=payload.favorite_game)
     DEMO_CATALOG_GAMES.set(session.scalar(select(func.count()).select_from(Game).where(Game.is_active.is_(True))) or 0)
     RECOMMENDATION_LATENCY.observe(perf_counter() - start)
     return RecommendationResponse(
         mode=payload.mode,
         favoriteGame=payload.favorite_game,
-        recommendations=recommendations,
-        explanation=MODE_EXPLANATIONS[payload.mode],
-        fixtureNotice=FIXTURE_NOTICE,
+        recommendations=result.recommendations,
+        explanation=result.explanation,
+        fixtureNotice=result.fixtureNotice,
+        algorithm=result.algorithm,
+        version=result.version,
+        dataSnapshot=result.dataSnapshot,
+        disclosure=result.disclosure,
     )
 
 
