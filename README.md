@@ -50,11 +50,17 @@ Local URLs after `docker compose up --build`:
 ## Validation commands
 
 ```bash
-# Backend API and migration tests
+# Backend API, migration, catalog, and local ML data-pipeline tests
 cd backend
 python -m venv .venv && source .venv/bin/activate
 python -m pip install -r requirements.txt -r requirements-dev.txt
 pytest -q
+
+# Milestone 2 local-only ML data-validation pipeline for the tiny self-authored sample
+python -m app.ml_pipeline source-check --manifest ../data/source-manifests/example.self-authored.json --repo-root ..
+python -m app.ml_pipeline normalize --manifest ../data/source-manifests/example.self-authored.json --fixture ../data/fixtures/ml/sample_games.self-authored.json --output /tmp/gamesense-ml-m2/normalized.json
+python -m app.ml_pipeline validate --manifest ../data/source-manifests/example.self-authored.json --normalized /tmp/gamesense-ml-m2/normalized.json --output /tmp/gamesense-ml-m2/validation.json
+python -m app.ml_pipeline manifest --manifest ../data/source-manifests/example.self-authored.json --normalized /tmp/gamesense-ml-m2/normalized.json --validation-report /tmp/gamesense-ml-m2/validation.json --output /tmp/gamesense-ml-m2/pipeline-manifest.json
 
 # Frontend build
 cd frontend
