@@ -91,6 +91,26 @@ def test_content_recommender_mode_uses_self_authored_sample_and_grounded_reasons
     assert "Evidence fields:" in payload["recommendations"][0]["reason"]
     assert "Score source:" in payload["recommendations"][0]["reason"]
 
+    metrics = client.get("/metrics").text
+    assert 'gamesense_recommendation_requests_total{algorithm="content-baseline-rrf",data_snapshot="gamesense-ml-self-authored-smoke-v1",mode="cozy",version="gamesense-local-baseline-recommender-v1"}' in metrics
+    assert 'gamesense_recommendation_catalog_items{algorithm="content-baseline-rrf",data_snapshot="gamesense-ml-self-authored-smoke-v1"} 2.0' in metrics
+    assert 'gamesense_recommendation_model_info{algorithm="content-baseline-rrf",data_snapshot="gamesense-ml-self-authored-smoke-v1",version="gamesense-local-baseline-recommender-v1"} 1.0' in metrics
+
+
+def test_content_recommender_fallback_metric_uses_bounded_reason(tmp_path: Path, monkeypatch) -> None:
+    monkeypatch.setenv("RECOMMENDER_MODE", "content")
+    client = build_test_client(tmp_path)
+
+    response = client.post(
+        "/api/recommendations",
+        json={"mode": "similar", "favorite_game": "Unknown Game"},
+    )
+
+    assert response.status_code == 200
+    metrics = client.get("/metrics").text
+    assert 'gamesense_recommendation_fallbacks_total{algorithm="content-baseline-rrf",reason="similar_seed_not_found"}' in metrics
+    assert "Unknown Game" not in metrics
+
 
 def test_readiness_checks_database_and_counts_catalog(tmp_path: Path) -> None:
     client = build_test_client(tmp_path)
