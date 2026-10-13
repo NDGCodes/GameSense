@@ -19,8 +19,7 @@ Not implemented in this milestone:
 
 - Downloading model weights, training an encoder, or generating real catalog embeddings.
 - External catalog acquisition or use of data beyond the existing self-authored sample fixture.
-- API/frontend serving integration.
-- Offline evaluation, model cards, deployment, or later ML milestones.
+- API/frontend serving integration, deployment, or later ML milestones.
 
 Dense vectors are treated as caller-owned precomputed inputs. Unit tests use clearly named synthetic vectors only to make deterministic assertions; they are not represented as model output.
 
@@ -34,6 +33,8 @@ PYTHONPATH=. pytest -q tests/test_recommender.py
 ```
 
 Result: `5 passed in 0.09s`.
+
+Milestone 4 adds an offline evaluation CLI and model card in `backend/app/ml_evaluation.py` and `docs/ml-baseline-model-card.md`. The evaluation is a deterministic smoke check over the tiny self-authored fixture and clearly labeled synthetic vector inputs; it is not evidence of real-catalog or user-interaction recommendation quality.
 
 The full backend test suite passed locally in a Python 3.10 virtual environment with:
 
