@@ -279,8 +279,10 @@ def recommend_prefit_content(
             tokens_by_index=tokens_by_index,
         ),
         "exact": _exact_rankings(candidates, mode=mode, seed_game=seed_game, trending_slugs=set()),
-        "catalog": _catalog_score_rankings(candidates, catalog_scores=catalog_scores or {}),
     }
+    supported_slugs = {slug for rankings in component_evidence.values() for slug in rankings}
+    catalog_candidates = [game for game in candidates if game.slug in supported_slugs]
+    component_evidence["catalog"] = _catalog_score_rankings(catalog_candidates, catalog_scores=catalog_scores or {})
 
     candidate_union = sorted({slug for rankings in component_evidence.values() for slug in rankings})
     recommendations: list[BaselineRecommendation] = []

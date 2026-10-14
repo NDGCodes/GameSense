@@ -270,11 +270,14 @@ def _resolve_seed_slug(games: list[CatalogGameSchema], favorite_game: str | None
     normalized = (favorite_game or "").strip().lower()
     if not normalized:
         return None
+    slug_match = next((game.slug for game in games if game.slug == normalized), None)
+    if slug_match is not None:
+        return slug_match
     return next(
         (
             game.slug
             for game in games
-            if game.slug == normalized or game.title.lower() == normalized or game.sourceGameId.lower() == normalized
+            if game.title.lower() == normalized or game.sourceGameId.lower() == normalized
         ),
         None,
     )

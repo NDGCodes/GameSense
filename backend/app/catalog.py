@@ -47,7 +47,9 @@ def recommend_games(
 
     if mode == "similar" and favorite_game:
         normalized = favorite_game.strip().lower()
-        favorite = next((game for game in games if game.title.lower() == normalized or game.slug == normalized), None)
+        favorite = next((game for game in games if game.slug == normalized), None)
+        if favorite is None:
+            favorite = next((game for game in games if game.title.lower() == normalized), None)
         if favorite:
             favorite_genres = set(favorite.genres)
             selected = [

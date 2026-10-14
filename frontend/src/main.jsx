@@ -33,7 +33,7 @@ function App() {
         setCatalog(games);
         setCatalogStatus(`${games.length} catalog options loaded`);
         if (games.length > 0 && favoriteGame === 'Cozy Comet Cafe') {
-          setFavoriteGame(games[0].title);
+          setFavoriteGame(games[0].slug);
         }
       })
       .catch(() => setCatalogStatus('catalog unavailable'));
@@ -62,10 +62,9 @@ function App() {
       <p className={`status status-${health}`}>API status: {health}</p>
     </section>
     <section className="panel">
-      <label>Favorite game<input value={favoriteGame} onChange={event => setFavoriteGame(event.target.value)} list="catalog-games" />
-        <datalist id="catalog-games">
-          {catalog.map(game => <option key={game.slug} value={game.title}>{game.source}</option>)}
-        </datalist>
+      <label>Favorite game{catalog.length > 0 ? <select value={favoriteGame} onChange={event => setFavoriteGame(event.target.value)}>
+          {catalog.map(game => <option key={game.slug} value={game.slug}>{game.title} ({game.slug})</option>)}
+        </select> : <input value={favoriteGame} onChange={event => setFavoriteGame(event.target.value)} />}
       </label>
       <p className="catalog-status">{catalogStatus}. In content bundle mode these titles come from the same returned snapshot used by the backend recommender; fixture mode remains labeled as demo data.</p>
       <label>Recommendation mode<select value={mode} onChange={event => setMode(event.target.value)}>

@@ -1,12 +1,44 @@
 import json
 from pathlib import Path
 
-from app.recommender import BASELINE_RECOMMENDER_VERSION, recommend_baseline
-from app.schemas import CatalogGameSchema
+from app.recommender import BASELINE_RECOMMENDER_VERSION, recommend_baseline, recommend_prefit_content
+from app.schemas import CatalogGameSchema, RecommendationRequest
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 FIXTURE = REPO_ROOT / "data/fixtures/ml/sample_games.self-authored.json"
 SOURCE_ID = "gamesense-self-authored-smoke-fixture"
+
+
+def test_prefit_popularity_requires_mode_support() -> None:
+    games = [
+        CatalogGameSchema(sourceId=SOURCE_ID, sourceGameId="1", slug="seed", title="Seed", tags=["Farming"]),
+        CatalogGameSchema(sourceId=SOURCE_ID, sourceGameId="2", slug="unrelated", title="Unrelated", tags=["Puzzle"]),
+        CatalogGameSchema(sourceId=SOURCE_ID, sourceGameId="3", slug="supported", title="Supported", tags=["Farming", "Relaxing", "Competitive"]),
+    ]
+    options = dict(
+        item_vectors={"seed": {0: 1.0}, "unrelated": {1: 1.0}, "supported": {0: 1.0}},
+        vocabulary={"farming": 0, "puzzle": 1}, idf=[1.0, 1.0],
+        tokens_by_index=["farming", "puzzle"], catalog_scores={"unrelated": 100.0, "supported": 1.0},
+    )
+    for mode in ("similar", "cozy", "competitive"):
+        ranked = recommend_prefit_content(games, mode=mode, seed_slug="seed", **options)
+        assert "unrelated" not in {item.slug for item in ranked}
+        assert "supported" in {item.slug for item in ranked}
+        assert "catalog" in next(item for item in ranked if item.slug == "supported").componentRanks
+    assert "unrelated" in {item.slug for item in recommend_prefit_content(games, mode="non-trending", **options)}
+
+
+def test_catalog_seed_slug_preserves_identity_and_request_accepts_catalog_lengths() -> None:
+    from app.recommender_service import _resolve_seed_slug
+
+    games = [
+        CatalogGameSchema(sourceId=SOURCE_ID, sourceGameId="1", slug="first", title="second"),
+        CatalogGameSchema(sourceId=SOURCE_ID, sourceGameId="2", slug="second", title="second"),
+    ]
+    request = RecommendationRequest(mode="similar", favorite_game=games[1].slug)
+    assert _resolve_seed_slug(games, request.favorite_game) == "second"
+    assert RecommendationRequest(favorite_game="t" * 240).favorite_game == "t" * 240
+    assert RecommendationRequest(favorite_game="s" * 160).favorite_game == "s" * 160
 
 
 def load_sample_games() -> list[CatalogGameSchema]:
