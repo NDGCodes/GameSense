@@ -53,13 +53,6 @@ Use this file while preparing the final submission. Do not mark cloud, cluster, 
 - Training, serving, or tuning recommendation models.
 - Claiming production readiness, live cluster health, or monitoring evidence from local-only validation.
 
-## Milestone 7 local validation log
+## Milestone 8 local evidence freeze
 
-Record only commands that were actually run for this branch. Current local validation from this worktree:
-
-- Passed: `helm lint deploy/helm/gamesense` (`1 chart(s) linted, 0 chart(s) failed`).
-- Passed: `helm template gamesense deploy/helm/gamesense >/Users/nishantdasgupta/Documents/ML_Ops/firstmate/data/gamesense-ml-m7-submission/helm-template-default.yaml`.
-- Passed: `helm template gamesense-content deploy/helm/gamesense --set backend.recommender.mode=content >/Users/nishantdasgupta/Documents/ML_Ops/firstmate/data/gamesense-ml-m7-submission/helm-template-content.yaml`.
-- Passed: `docker compose config --quiet`.
-- Passed: `cd backend && PYTHONPATH=. /Users/nishantdasgupta/Documents/ML_Ops/firstmate/data/gamesense-ml-m7-submission/venv310/bin/pytest -q` with Python 3.10.13 (`26 passed, 1 warning in 5.39s`).
-- Passed: `git diff --check`.
+Record only commands that were actually run for this branch. See the [M8 evidence ledger](../docs/m8-final-local-evidence.md) for the captured results, interpreter coverage, raw artifact location, and explicit non-claims.
