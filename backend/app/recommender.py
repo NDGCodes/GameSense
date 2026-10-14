@@ -8,6 +8,7 @@ from typing import Any, Iterable, Literal, Mapping, Sequence
 from app.schemas import CatalogGameSchema
 
 BaselineRecommendationMode = Literal["similar", "cozy", "competitive", "non-trending"]
+SparseVector = Mapping[int, float]
 
 BASELINE_RECOMMENDER_VERSION = "gamesense-local-baseline-recommender-v1"
 RRF_K = 60
@@ -124,6 +125,15 @@ def _sparse_cosine(left: Mapping[str, float], right: Mapping[str, float]) -> flo
     return dot / (left_norm * right_norm)
 
 
+def _indexed_sparse_cosine(left: SparseVector, right: SparseVector) -> float:
+    dot = sum(weight * right.get(index, 0.0) for index, weight in left.items())
+    left_norm = math.sqrt(sum(weight * weight for weight in left.values()))
+    right_norm = math.sqrt(sum(weight * weight for weight in right.values()))
+    if left_norm == 0 or right_norm == 0:
+        return 0.0
+    return dot / (left_norm * right_norm)
+
+
 def _dense_rankings(
     candidates: Sequence[CatalogGameSchema],
     *,
@@ -169,6 +179,142 @@ def _exact_rankings(
             is_non_trending = game.slug not in trending_slugs and not bool(game.metadata.get("trending", False))
             scores[game.slug] = (1.0 if is_non_trending else 0.0, {"excludedTrendingSlug": game.slug in trending_slugs, "metadataTrending": bool(game.metadata.get("trending", False)), "sourceFields": ["metadata", "callerTrendingSlugs"]})
     return _rank_scores(scores, {game.slug: game for game in candidates})
+
+
+def _prefit_query_vector(
+    query_tokens: Sequence[str],
+    *,
+    vocabulary: Mapping[str, int],
+    idf: Sequence[float],
+) -> dict[int, float]:
+    counts: dict[int, int] = {}
+    for token in query_tokens:
+        index = vocabulary.get(token)
+        if index is not None:
+            counts[index] = counts.get(index, 0) + 1
+    weighted = {index: count * idf[index] for index, count in counts.items() if index < len(idf)}
+    norm = math.sqrt(sum(value * value for value in weighted.values()))
+    if norm == 0:
+        return {}
+    return {index: value / norm for index, value in weighted.items()}
+
+
+def _prefit_tfidf_rankings(
+    candidates: Sequence[CatalogGameSchema],
+    *,
+    query_vector: SparseVector,
+    item_vectors: Mapping[str, SparseVector],
+    tokens_by_index: Sequence[str],
+) -> dict[str, ComponentEvidence]:
+    if not query_vector:
+        return {}
+    scores: dict[str, tuple[float, dict[str, Any]]] = {}
+    for game in candidates:
+        item_vector = item_vectors.get(game.slug, {})
+        shared_indices = set(query_vector).intersection(item_vector)
+        matched_tokens = sorted(
+            (tokens_by_index[index], query_vector[index] * item_vector[index])
+            for index in shared_indices
+            if index < len(tokens_by_index)
+        )
+        matched_tokens.sort(key=lambda item: (-item[1], item[0]))
+        score = _indexed_sparse_cosine(query_vector, item_vector)
+        scores[game.slug] = (
+            score,
+            {
+                "matchedTokens": [token for token, _ in matched_tokens[:8]],
+                "sourceFields": ["fittedTfidfTitleDescriptionGenresTags"],
+            },
+        )
+    return _rank_scores(scores, {game.slug: game for game in candidates})
+
+
+def _catalog_score_rankings(
+    candidates: Sequence[CatalogGameSchema],
+    *,
+    catalog_scores: Mapping[str, float],
+) -> dict[str, ComponentEvidence]:
+    scores = {
+        game.slug: (
+            float(catalog_scores.get(game.slug, 0.0)),
+            {"contentBundleScore": float(catalog_scores.get(game.slug, 0.0)), "sourceFields": ["metadata.contentBundleScore"]},
+        )
+        for game in candidates
+        if catalog_scores.get(game.slug, 0.0) > 0
+    }
+    return _rank_scores(scores, {game.slug: game for game in candidates})
+
+
+def recommend_prefit_content(
+    games: Sequence[CatalogGameSchema],
+    *,
+    mode: BaselineRecommendationMode,
+    seed_slug: str | None = None,
+    item_vectors: Mapping[str, SparseVector],
+    vocabulary: Mapping[str, int],
+    idf: Sequence[float],
+    tokens_by_index: Sequence[str],
+    catalog_scores: Mapping[str, float] | None = None,
+    limit: int = 10,
+) -> list[BaselineRecommendation]:
+    """Rank catalog records using fitted portable TF-IDF vectors plus existing exact signals."""
+
+    active_games = [game for game in games if game.isActive]
+    games_by_slug = {game.slug: game for game in active_games}
+    seed_game = games_by_slug.get(seed_slug or "")
+    excluded_slugs = {seed_game.slug} if mode == "similar" and seed_game else set()
+    candidates = [game for game in active_games if game.slug not in excluded_slugs]
+
+    if mode == "similar" and seed_game is not None:
+        query_vector = item_vectors.get(seed_game.slug, {})
+    else:
+        query_tokens = [token for term in _MODE_QUERY_TERMS.get(mode, ()) for token in _tokenize(term)]
+        query_vector = _prefit_query_vector(query_tokens, vocabulary=vocabulary, idf=idf)
+
+    component_evidence = {
+        "tfidf": _prefit_tfidf_rankings(
+            candidates,
+            query_vector=query_vector,
+            item_vectors=item_vectors,
+            tokens_by_index=tokens_by_index,
+        ),
+        "exact": _exact_rankings(candidates, mode=mode, seed_game=seed_game, trending_slugs=set()),
+        "catalog": _catalog_score_rankings(candidates, catalog_scores=catalog_scores or {}),
+    }
+
+    candidate_union = sorted({slug for rankings in component_evidence.values() for slug in rankings})
+    recommendations: list[BaselineRecommendation] = []
+    for slug in candidate_union:
+        score = sum(1 / (RRF_K + evidence[slug].rank) for evidence in component_evidence.values() if slug in evidence)
+        game = games_by_slug[slug]
+        component_ranks = {name: rankings[slug].rank for name, rankings in component_evidence.items() if slug in rankings}
+        signals = {
+            name: {"rank": rankings[slug].rank, "score": rankings[slug].score, **rankings[slug].signals}
+            for name, rankings in component_evidence.items()
+            if slug in rankings
+        }
+        recommendations.append(
+            BaselineRecommendation(
+                slug=slug,
+                title=game.title,
+                score=round(score, 10),
+                componentRanks=component_ranks,
+                explanation={
+                    "version": BASELINE_RECOMMENDER_VERSION,
+                    "mode": mode,
+                    "seedSlug": seed_game.slug if seed_game else None,
+                    "sourceId": game.sourceId,
+                    "sourceGameId": game.sourceGameId,
+                    "sourceFieldsUsed": sorted({field for signal in signals.values() for field in signal.get("sourceFields", [])}),
+                    "signals": signals,
+                    "fusion": {"method": "reciprocal-rank-fusion", "k": RRF_K},
+                    "prefitTfidf": True,
+                },
+            )
+        )
+
+    recommendations.sort(key=lambda item: (-item.score, item.title.lower(), item.slug))
+    return recommendations[:limit]
 
 
 def recommend_baseline(

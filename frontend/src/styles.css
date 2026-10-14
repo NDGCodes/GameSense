@@ -13,6 +13,7 @@ button:hover { background: #7dd3fc; }
 .status-unavailable { color: #fca5a5; }
 .results { display: grid; gap: 1rem; }
 .notice { border-left: 4px solid #38bdf8; padding-left: .75rem; color: #bae6fd; }
+.catalog-status { color: #cbd5e1; font-size: .92rem; margin: 0; }
 .metadata { display: flex; flex-wrap: wrap; gap: .5rem; }
 .metadata span { background: #1e293b; border: 1px solid #334155; border-radius: 999px; color: #cbd5e1; font-size: .82rem; padding: .35rem .6rem; }
 .cards { display: grid; gap: .75rem; }

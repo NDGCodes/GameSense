@@ -36,6 +36,26 @@ python -m app.ml_pipeline manifest \
 - `validate` reports catalog schema errors, source mismatches, duplicate identifiers, and missing genre/tag signals.
 - `manifest` records deterministic row counts, validation findings, and checksums for local evidence.
 
+## Kaggle Steam Store Games local bundle commands
+
+After the user attaches the Kaggle `Steam Store Games (Clean dataset)` files in Kaggle, the notebook uses the same backend pipeline helpers for the accepted local-demo scope:
+
+```bash
+python -m app.ml_pipeline steam-store-source-check \
+  --manifest ../data/source-manifests/kaggle.steam-store-games-clean.json
+
+python -m app.ml_pipeline normalize-steam-store \
+  --manifest ../data/source-manifests/kaggle.steam-store-games-clean.json \
+  --dataset-dir /path/to/kaggle/steam-store-games \
+  --output /tmp/gamesense-steam-normalized-catalog.json
+
+python -m app.ml_pipeline validate \
+  --manifest ../data/source-manifests/kaggle.steam-store-games-clean.json \
+  --normalized /tmp/gamesense-steam-normalized-catalog.json
+```
+
+`steam-store-source-check` is intentionally separate from the self-authored fixture gate. It accepts only the named Kaggle source for the recorded local notebook/app-demo scope, requires attribution, rejects repository/CI use, and keeps Steam/SteamSpy upstream terms uncertainty visible as a warning rather than legal clearance.
+
 ## Expected evidence for the committed tiny sample
 
 For `data/source-manifests/example.self-authored.json` and `data/fixtures/ml/sample_games.self-authored.json`:
