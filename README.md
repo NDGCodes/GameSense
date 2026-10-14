@@ -18,7 +18,7 @@ The repository does **not** include model training, model serving, Steam dataset
 
 ## Local development
 
-Prerequisites: Docker, Docker Compose, Node.js 20+, Python 3.10 or 3.11 for the supported local backend test path, and optionally Terraform, Helm, kubectl, and AWS credentials for later infrastructure validation. Python 3.14 behavior is not diagnosed or claimed by this local evidence freeze.
+Prerequisites: Docker, Docker Compose, Node.js 20+, Python 3.10 or 3.11 for the supported local backend test path, and optionally Terraform, Helm, kubectl, and AWS credentials for later infrastructure validation.
 
 ```bash
 # Run the local full stack: Postgres, migrations, API, frontend, Prometheus, Grafana
@@ -88,7 +88,7 @@ terraform -chdir=infra/terraform validate
 
 Terraform commands download providers/modules but must not be followed by `plan` or `apply` unless AWS usage is authorized. Do not claim live AWS, Kubernetes, Prometheus, Grafana, or submission evidence until it is verified in the target environment.
 
-The M8 final local evidence freeze and claim audit is recorded in `docs/m8-final-local-evidence.md`. It maps README and walkthrough claims to local/static evidence or explicit non-claims.
+The [M8 final local evidence freeze and claim audit](docs/m8-final-local-evidence.md) maps README and walkthrough claims to local/static evidence or explicit non-claims, including interpreter coverage.
 
 ## Demo fixture catalog
 

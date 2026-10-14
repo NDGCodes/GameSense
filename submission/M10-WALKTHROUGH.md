@@ -55,13 +55,4 @@ Use this file while preparing the final submission. Do not mark cloud, cluster, 
 
 ## Milestone 8 local evidence freeze
 
-Record only commands that were actually run for this branch. Current local validation from this worktree is summarized in `docs/m8-final-local-evidence.md`; raw artifacts are outside the repository at `/Users/nishantdasgupta/Documents/ML_Ops/firstmate/data/gamesense-ml-m8-evidence/`.
-
-- Passed: backend tests with Python 3.10.13 (`26 passed, 1 warning`) using the committed requirements.
-- Passed: frontend `npm ci` and `npm run build`.
-- Passed: `docker compose config --quiet`.
-- Passed: `docker compose --profile content-smoke run --rm content-smoke` while Docker resources were available.
-- Passed: `helm lint deploy/helm/gamesense` and default/content `helm template` renders.
-- Passed: `terraform -chdir=infra/terraform fmt -check -recursive`, `terraform -chdir=infra/terraform init -backend=false`, and `terraform -chdir=infra/terraform validate`.
-- Not run and not claimed: real dataset download/ingest, Kaggle real-data execution, model training/fine-tuning, accuracy tuning, `terraform plan`, `terraform apply`, AWS/EKS provisioning, live Kubernetes/GitOps/Prometheus/Grafana verification, or production deployment.
-- Python 3.14 failure causes are unverified; the local evidence bundle supports Python 3.10.13 for these checks and documents Python 3.11 as the intended supported development target.
+Record only commands that were actually run for this branch. See the [M8 evidence ledger](../docs/m8-final-local-evidence.md) for the captured results, interpreter coverage, raw artifact location, and explicit non-claims.

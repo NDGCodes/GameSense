@@ -33,7 +33,7 @@ Docker resources were available for the Compose static check and content-smoke r
 
 ## Supported local Python evidence
 
-Local backend validation is evidenced with Python 3.10.13. This branch also documents Python 3.11 as a supported local development target because the dependency set and README already target Python 3.11+, but this M8 evidence bundle did not run a Python 3.11 interpreter in this worktree. Python 3.14 behavior is not diagnosed here; any earlier Python 3.14 failure cause remains unverified and is not claimed.
+Local backend validation is evidenced with Python 3.10.13. Python 3.11 is the development target used by `backend/Dockerfile` and `.github/workflows/ci.yml`, but this M8 evidence bundle did not run a Python 3.11 interpreter in this worktree. See [local development](../README.md#local-development) for prerequisites. Python 3.14 behavior is not diagnosed here; any earlier Python 3.14 failure cause remains unverified and is not claimed.
 
 ## Claim ledger
 
