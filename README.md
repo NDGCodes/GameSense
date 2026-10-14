@@ -14,7 +14,7 @@ The repository does **not** include model training, model serving, Steam dataset
 - `deploy/helm/` - Helm chart for the frontend/backend workloads, services, ingress, probes, and scrape annotations.
 - `deploy/gitops/` - Argo CD `Application` manifest for the Helm chart.
 - `observability/` - Prometheus scrape config and Grafana dashboard provisioning.
-- `submission/` - M10 walkthrough and evidence checklist.
+- `submission/` - M9 local submission package plus M10 walkthrough and evidence checklist.
 
 ## Local development
 
@@ -129,7 +129,7 @@ Implemented in this slice:
 - [x] Terraform foundation for AWS VPC and EKS.
 - [x] Helm chart and Argo CD GitOps manifest.
 - [x] Prometheus metrics and Grafana dashboard starter.
-- [x] Submission walkthrough checklist that separates local evidence from cloud evidence.
+- [x] M9 local submission package and walkthrough checklist that separate local evidence from cloud evidence.
 - [x] Local baseline recommender and offline smoke evaluation/model card for the tiny self-authored fixture.
 
 Deferred until the later authorized phases:
