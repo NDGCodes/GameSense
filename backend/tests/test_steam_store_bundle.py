@@ -171,3 +171,38 @@ def test_load_bundle_rejects_id_mapping_mismatch(tmp_path: Path) -> None:
 
     with pytest.raises(BundleError, match="checksum mismatch"):
         load_content_bundle(tampered)
+
+
+def test_kaggle_notebook_exports_bundle_and_run_report(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    import hashlib
+    import shutil
+    import sys
+
+    notebook = json.loads((REPO_ROOT / "notebooks/gamesense_baseline_kaggle.ipynb").read_text(encoding="utf-8"))
+    repo = tmp_path / "repo"
+    shutil.copytree(REPO_ROOT / "backend/app", repo / "backend/app", ignore=shutil.ignore_patterns("__pycache__"))
+    manifest_path = repo / "data/source-manifests" / KAGGLE_MANIFEST.name
+    manifest_path.parent.mkdir(parents=True)
+    shutil.copyfile(KAGGLE_MANIFEST, manifest_path)
+    dataset = tmp_path / "dataset"
+    write_tiny_steam_dataset(dataset)
+    monkeypatch.setenv("GAMESENSE_REPO_ROOT", str(repo))
+    monkeypatch.setenv("GAMESENSE_STEAM_STORE_DATASET_DIR", str(dataset))
+    monkeypatch.chdir(repo)
+    monkeypatch.setattr(sys, "path", list(sys.path))
+    namespace = {"__name__": "__main__"}
+    for index, cell in enumerate(notebook["cells"]):
+        if cell["cell_type"] == "code":
+            exec(compile("".join(cell["source"]), f"notebook-cell-{index}", "exec"), namespace)
+
+    bundle_path = namespace["bundle_path"]
+    report_path = namespace["run_report_path"]
+    assert bundle_path.is_relative_to(repo)
+    assert report_path.is_relative_to(repo)
+    report = json.loads(report_path.read_text(encoding="utf-8"))
+    bundle = load_content_bundle(bundle_path)
+    assert len(bundle.catalog) == 3
+    assert report["bundlePath"] == str(bundle_path)
+    assert report["bundleSha256"] == hashlib.sha256(bundle_path.read_bytes()).hexdigest()
+    assert report["evaluationSummary"]["validationOk"] is True
+    assert report["evaluationSummary"]["rowCount"] == len(bundle.catalog)
