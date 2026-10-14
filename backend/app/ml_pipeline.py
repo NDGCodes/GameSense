@@ -373,7 +373,7 @@ def normalize_steam_store_games(manifest_path: Path, dataset_dir: Path, *, limit
     steamspy_tags = _index_rows(_read_csv(dataset_dir / "steamspy_tag_data.csv"), ("appid", "steam_appid"))
 
     games: list[dict[str, Any]] = []
-    skipped = {"missingIdOrTitle": 0, "nonEnglish": 0, "duplicateAppId": 0}
+    skipped = {"missingIdOrTitle": 0, "duplicateAppId": 0}
     seen_appids: set[str] = set()
     for raw_index, row in enumerate(steam_rows, start=1):
         appid = str(row.get("appid") or row.get("steam_appid") or "").strip()
@@ -383,9 +383,6 @@ def normalize_steam_store_games(manifest_path: Path, dataset_dir: Path, *, limit
             continue
         if appid in seen_appids:
             skipped["duplicateAppId"] += 1
-            continue
-        if str(row.get("english", "1")).strip() not in ("", "1", "true", "True"):
-            skipped["nonEnglish"] += 1
             continue
         seen_appids.add(appid)
         desc_row = descriptions.get(appid, {})

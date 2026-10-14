@@ -121,7 +121,7 @@ def clear_content_bundle_cache() -> None:
 
 
 def _bundle_path_from_env() -> Path | None:
-    raw = os.getenv("CONTENT_BUNDLE_PATH") or os.getenv("RECOMMENDER_BUNDLE_PATH")
+    raw = os.getenv("CONTENT_BUNDLE_PATH")
     if not raw:
         return None
     return Path(raw).expanduser().resolve()

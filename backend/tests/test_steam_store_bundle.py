@@ -17,7 +17,7 @@ def write_tiny_steam_dataset(dataset_dir: Path) -> None:
             [
                 "appid,name,release_date,english,developer,publisher,platforms,categories,genres,steamspy_tags,positive,negative,average_playtime,median_playtime,owners,price",
                 "10,Forest Farm,May 1 2019,1,Example Dev,Example Pub,windows;mac,Single-player;Steam Achievements,Simulation;Indie,Relaxing;Farming;Crafting,120,5,42,30,20000 .. 50000,9.99",
-                "20,Harbor Builder,Apr 4 2018,1,Example Dev,Example Pub,windows,Single-player;Steam Cloud,Simulation;Strategy,Management;Crafting;Relaxing,80,10,50,35,20000 .. 50000,12.99",
+                "20,Harbor Builder,Apr 4 2018,0,Example Dev,Example Pub,windows,Single-player;Steam Cloud,Simulation;Strategy,Management;Crafting;Relaxing,80,10,50,35,20000 .. 50000,12.99",
                 "30,Arena Rockets,Mar 3 2017,1,Example Dev,Example Pub,windows,Multi-player;Co-op,Action;Sports,Competitive;Co-op;Teamwork,200,20,60,40,50000 .. 100000,0",
             ]
         )
@@ -103,6 +103,21 @@ def test_export_import_bundle_validates_alignment_and_recommends_from_same_snaps
     assert [game.slug for game in bundle.catalog] == ["steam-10", "steam-20", "steam-30"]
     assert set(bundle.item_vectors) == {"steam-10", "steam-20", "steam-30"}
     assert "Steam Store Games" in bundle.disclosure
+
+
+def test_catalog_uses_only_documented_bundle_configuration(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    from app.recommender_service import list_games_for_api
+
+    missing_bundle = tmp_path / "missing.zip"
+    monkeypatch.setenv("RECOMMENDER_MODE", "content")
+    monkeypatch.delenv("CONTENT_BUNDLE_PATH", raising=False)
+    monkeypatch.setenv("RECOMMENDER_BUNDLE_PATH", str(missing_bundle))
+
+    assert list_games_for_api(None)
+
+    monkeypatch.setenv("CONTENT_BUNDLE_PATH", str(missing_bundle))
+    with pytest.raises(RuntimeError, match="Configured content bundle is invalid"):
+        list_games_for_api(None)
 
 
 def test_load_bundle_rejects_id_mapping_mismatch(tmp_path: Path) -> None:
