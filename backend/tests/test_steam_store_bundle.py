@@ -120,6 +120,32 @@ def test_catalog_uses_only_documented_bundle_configuration(tmp_path: Path, monke
         list_games_for_api(None)
 
 
+@pytest.mark.parametrize("other_tag,expected_slugs", [("Competitive", []), ("Crafting", ["other"])])
+def test_similar_fallback_excludes_seed_in_both_content_paths(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, other_tag: str, expected_slugs: list[str],
+) -> None:
+    from app import recommender_service
+    from app.schemas import CatalogGameSchema
+
+    games = [
+        CatalogGameSchema(sourceId="kaggle.steam-store-games-clean", sourceGameId="1", slug="seed", title="Unique", tags=["Cozy"]),
+        CatalogGameSchema(sourceId="kaggle.steam-store-games-clean", sourceGameId="2", slug="other", title="Separate", tags=[other_tag]),
+    ]
+    monkeypatch.setattr(recommender_service, "_load_content_games", lambda: games)
+    result = recommender_service._content_recommendations(mode="similar", favorite_game="seed", limit=3)
+    assert result.fallbackReason == "similar_no_candidates"
+    assert [game.slug for game in result.recommendations] == expected_slugs
+
+    bundle_path = tmp_path / "fallback.zip"
+    manifest = json.loads(KAGGLE_MANIFEST.read_text(encoding="utf-8"))
+    build_tfidf_content_bundle(games=games, source_manifest=manifest, output_path=bundle_path)
+    result = recommender_service._bundle_recommendations(
+        load_content_bundle(bundle_path), mode="similar", favorite_game="seed", limit=3,
+    )
+    assert result.fallbackReason == "similar_no_candidates"
+    assert [game.slug for game in result.recommendations] == expected_slugs
+
+
 def test_load_bundle_rejects_id_mapping_mismatch(tmp_path: Path) -> None:
     write_tiny_steam_dataset(tmp_path / "dataset")
     normalized = normalize_steam_store_games(KAGGLE_MANIFEST, tmp_path / "dataset")

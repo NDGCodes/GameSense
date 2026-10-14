@@ -180,7 +180,7 @@ def _content_recommendations(
     if not ranked and mode == "similar":
         fallback_reason = "similar_no_candidates"
         baseline_mode = "cozy"
-        ranked = recommend_baseline(games, mode=baseline_mode, limit=limit)
+        ranked = recommend_baseline([game for game in games if game.slug != seed_slug], mode=baseline_mode, limit=limit)
 
     games_by_slug = {game.slug: game for game in games}
     return RecommendationServiceResult(
@@ -222,7 +222,7 @@ def _bundle_recommendations(
         fallback_reason = "similar_no_candidates"
         baseline_mode = "cozy"
         ranked = recommend_prefit_content(
-            bundle.catalog,
+            [game for game in bundle.catalog if game.slug != seed_slug],
             mode=baseline_mode,
             item_vectors=bundle.item_vectors,
             vocabulary=bundle.vocabulary,
