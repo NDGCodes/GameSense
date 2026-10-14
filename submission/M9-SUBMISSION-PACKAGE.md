@@ -63,16 +63,13 @@ Open `docs/m8-final-local-evidence.md` and show the evidence table.
 
 Narration:
 
-> M8 froze the local evidence. The captured bundle lives outside the repository at `/Users/nishantdasgupta/Documents/ML_Ops/firstmate/data/gamesense-ml-m8-evidence/` and is summarized in this ledger. The supported checks are backend tests, frontend build, Docker Compose config, content recommender smoke, Helm lint/template, and Terraform static validation. The ledger also records tool versions and explicitly says no Terraform plan/apply, AWS, Kubernetes, real-data, model training, fine-tuning, or accuracy-tuning command was run.
+> M8 froze the local evidence. Use the ledger's evidence table to show the recorded commands and results, then its claim audit to explain what those checks support. Keep local/static evidence separate from the deferred real-data, training, and cloud phases.
 
 Evidence to point at:
 
-- `backend-pytest.txt` — 26 backend tests passed under Python 3.10.13.
-- `frontend-build.txt` — frontend build passed.
-- `compose-config.txt` — Compose config validated.
-- `compose-content-smoke.txt` — content recommender smoke passed with committed fixture.
-- `helm-lint.txt`, `helm-template-default.yaml`, `helm-template-content.yaml` — Helm lint/render evidence.
-- `terraform-fmt.txt`, `terraform-init.txt`, `terraform-validate.txt` — Terraform static validation evidence.
+- [Evidence bundle](../docs/m8-final-local-evidence.md#evidence-bundle) — authoritative artifact location, tool versions, raw artifact names, commands, and results.
+- [Supported local Python evidence](../docs/m8-final-local-evidence.md#supported-local-python-evidence) — interpreter coverage and its limits.
+- [Claim ledger](../docs/m8-final-local-evidence.md#claim-ledger) — supported claims and explicit non-claims.
 
 ### 4. Infrastructure and observability readiness, not deployment (45-60 seconds)
 
@@ -111,11 +108,8 @@ Narration:
    - No real Steam catalog and no trained model claims.
 
 4. **M8 evidence ledger**
-   - Backend tests: 26 passed.
-   - Frontend build: passed.
-   - Compose config/content-smoke: passed.
-   - Helm lint/render: passed.
-   - Terraform fmt/init/validate: passed.
+   - Show the [authoritative evidence table](../docs/m8-final-local-evidence.md#evidence-bundle) for backend, frontend, Compose, Helm, and Terraform results.
+   - Use the ledger's recorded counts, versions, and artifact names.
 
 5. **Deployment readiness boundaries**
    - Manifests and static validation exist.
@@ -134,11 +128,11 @@ Narration:
 | --- | --- | --- |
 | What is the app architecture? | `README.md`, repository directories | Local app/infrastructure foundation exists. |
 | What local evidence was captured? | `docs/m8-final-local-evidence.md` | M8 evidence ledger summarizes actual local/static checks and raw artifact names. |
-| Does the backend test locally? | `docs/m8-final-local-evidence.md`, `backend/tests/` | M8 captured 26 passing backend tests under Python 3.10.13. |
-| Does the frontend build locally? | `docs/m8-final-local-evidence.md`, `frontend/` | M8 captured a passing frontend build. |
-| Is Compose valid? | `docker-compose.yml`, M8 ledger | Compose config passed; content-smoke passed when Docker resources were available. |
-| Is Helm ready for review? | `deploy/helm/gamesense/`, M8 ledger | Helm lint and default/content renders passed statically. |
-| Is Terraform ready for static review? | `infra/terraform/`, M8 ledger | Terraform fmt/init without backend/validate passed; no plan/apply claimed. |
+| Does the backend test locally? | `docs/m8-final-local-evidence.md`, `backend/tests/` | See the [M8 evidence table](../docs/m8-final-local-evidence.md#evidence-bundle) for the recorded test count and interpreter. |
+| Does the frontend build locally? | `docs/m8-final-local-evidence.md`, `frontend/` | See the [M8 evidence table](../docs/m8-final-local-evidence.md#evidence-bundle) for the build result. |
+| Is Compose valid? | `docker-compose.yml`, M8 ledger | See the [M8 evidence table](../docs/m8-final-local-evidence.md#evidence-bundle) for config/content-smoke results and conditions. |
+| Is Helm ready for review? | `deploy/helm/gamesense/`, M8 ledger | See the [M8 evidence table](../docs/m8-final-local-evidence.md#evidence-bundle) for lint/render results. |
+| Is Terraform ready for static review? | `infra/terraform/`, M8 ledger | See the [M8 evidence table](../docs/m8-final-local-evidence.md#evidence-bundle) for static validation results and limits. |
 | What data powers local recommendations? | `data/fixtures/ml/sample_games.self-authored.json`, `README.md`, `docs/ml-data-policy.md` | Tiny self-authored fixture only. |
 | Was real Kaggle/Steam data used? | `docs/m8-final-local-evidence.md`, `docs/ml-data-policy.md` | No. Real-data acquisition is deferred. |
 | Was a model trained or served? | `README.md`, `docs/ml-baseline-model-card.md`, M8 ledger | No trained model artifact or model serving is claimed. |

@@ -14,7 +14,7 @@ The repository does **not** include model training, model serving, Steam dataset
 - `deploy/helm/` - Helm chart for the frontend/backend workloads, services, ingress, probes, and scrape annotations.
 - `deploy/gitops/` - Argo CD `Application` manifest for the Helm chart.
 - `observability/` - Prometheus scrape config and Grafana dashboard provisioning.
-- `submission/` - M9 local submission package plus M10 walkthrough and evidence checklist.
+- `submission/` - [M9 local submission package](submission/M9-SUBMISSION-PACKAGE.md) plus [M10 walkthrough and evidence checklist](submission/M10-WALKTHROUGH.md).
 
 ## Local development
 
