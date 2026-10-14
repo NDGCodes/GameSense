@@ -27,9 +27,6 @@ docker compose up --build
 # Smoke-test content recommender mode against the committed self-authored sample fixture
 docker compose --profile content-smoke run --rm content-smoke
 
-# After the user returns a Kaggle bundle, keep it outside git and load it locally
-RECOMMENDER_MODE=content CONTENT_BUNDLE_PATH=/absolute/path/to/gamesense-steam-store-content-bundle.zip uvicorn app.main:app --reload
-
 # API only with local SQLite (runs migrations first)
 cd backend
 python -m venv .venv && source .venv/bin/activate
@@ -95,9 +92,7 @@ The [M8 final local evidence freeze and claim audit](docs/m8-final-local-evidenc
 
 ## Kaggle content-bundle handoff
 
-See [Kaggle Steam Store bundle handoff](docs/kaggle-steam-store-bundle.md) for the exact user steps. The source manifest for the selected Kaggle dataset is `data/source-manifests/kaggle.steam-store-games-clean.json`; it records Kaggle's listed CC BY 4.0 attribution requirement, historical May-2019 snapshot limitation, no raw-data/bundle commits, and unresolved Steam/SteamSpy upstream terms uncertainty accepted only for the local notebook/app-demo scope.
-
-`notebooks/gamesense_baseline_kaggle.ipynb` normalizes the attached Kaggle files, validates the normalized catalog, fits sparse TF-IDF/tag features, writes a portable JSON-in-zip model-and-catalog bundle, and emits a run report with source file hashes and sanity evaluation. The backend validates bundle checksums and row-ID alignment before serving recommendations from that snapshot.
+See [Kaggle Steam Store bundle handoff](docs/kaggle-steam-store-bundle.md) for notebook setup, returned artifacts, local backend startup, catalog selection, and recommendation limitations. The [source manifest](data/source-manifests/kaggle.steam-store-games-clean.json) owns the selected source’s provenance, attribution, and accepted usage scope.
 
 ## Demo fixture catalog
 

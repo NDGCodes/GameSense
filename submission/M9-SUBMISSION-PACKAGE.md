@@ -6,7 +6,7 @@ Final submission narrative framing is still a captain decision. Use this package
 
 ## One-minute summary
 
-GameSense currently demonstrates a local app and infrastructure foundation for a Steam-style recommendation project. The repository contains a FastAPI backend, React/Vite frontend, database migrations, Docker Compose stack, Prometheus/Grafana local observability, GitHub Actions workflow, Terraform AWS/EKS foundation, Helm chart, Argo CD manifest, and a local baseline recommender/evaluation path that runs only against a tiny self-authored fixture catalog.
+This M9 evidence package demonstrates a local app and infrastructure foundation for a Steam-style recommendation project. The repository contains a FastAPI backend, React/Vite frontend, database migrations, Docker Compose stack, Prometheus/Grafana local observability, GitHub Actions workflow, Terraform AWS/EKS foundation, Helm chart, Argo CD manifest, and a local baseline recommender/evaluation path whose recorded evidence uses a tiny self-authored fixture catalog. See the [README](../README.md) for current product capabilities.
 
 The local evidence freeze from M8 shows backend tests, frontend build, Compose config/content-smoke, Helm lint/render, and Terraform static validation. The fixture data is hand-written demo data. No real external dataset has been downloaded or ingested, no Kaggle training has been run, no trained model file has been produced, and no AWS resources have been provisioned for this package.
 
@@ -23,7 +23,7 @@ Show these paths in the file tree:
 - `frontend/` — React/Vite single-page app for the recommendation UI.
 - `backend/` — FastAPI API, database access, migrations, tests, recommender service, and Prometheus metrics.
 - `data/fixtures/ml/sample_games.self-authored.json` — tiny self-authored local sample catalog.
-- `notebooks/gamesense_baseline_kaggle.ipynb` — Kaggle-compatible notebook scaffold that defaults to the self-authored local fixture.
+- `notebooks/gamesense_baseline_kaggle.ipynb` — notebook workflow described in the [handoff guide](../docs/kaggle-steam-store-bundle.md).
 - `docker-compose.yml` — local Postgres/backend/frontend/Prometheus/Grafana stack.
 - `infra/terraform/` — AWS VPC/EKS infrastructure foundation for later authorized cloud work.
 - `deploy/helm/` and `deploy/gitops/` — Helm and Argo CD deployment manifests.
@@ -81,17 +81,13 @@ Narration:
 
 ### 5. Kaggle and real-data handoff (30-45 seconds)
 
-Show `notebooks/gamesense_baseline_kaggle.ipynb` and `docs/ml-data-policy.md`.
-
-Narration:
-
-> The notebook path is ready as a starting point for a later Kaggle run after a data source is selected and approved. Before using real data, the project requires source/license documentation and validation through the data policy gates. This package does not include a real-data notebook run, trained model file, embeddings, or model serving.
+Show the [Kaggle handoff guide](../docs/kaggle-steam-store-bundle.md) for the current notebook and returned-bundle workflow. Keep that workflow separate from the fixture-only M8/M9 evidence; no real-data notebook run or returned artifact is included in this package.
 
 ### 6. Closing / next steps (20-30 seconds)
 
 Narration:
 
-> The local scope is packaged for review: app, tests, build, local containers, static IaC, Helm/GitOps manifests, local observability, and fixture-only recommender evidence. The next phases are real-data acquisition approval, Kaggle training, loading the trained model artifact back into the repo or deployment environment, and then authorized AWS deployment. The final story and submission narrative scope remain a captain decision.
+> The local scope is packaged for review: app, tests, build, local containers, static IaC, Helm/GitOps manifests, local observability, and fixture-only recommender evidence. Follow the authoritative Kaggle handoff guide for the next notebook run and returned-bundle integration; AWS deployment requires separate authorization. The final story and submission narrative scope remain a captain decision.
 
 ## Slide outline
 
@@ -116,9 +112,7 @@ Narration:
    - No AWS plan/apply, EKS, Argo CD sync, public ingress, or live monitoring evidence yet.
 
 6. **Next-phase handoff**
-   - Approve real-data source and license terms.
-   - Run Kaggle training after data download.
-   - Bring trained model artifact back for integration.
+   - Follow the [Kaggle handoff guide](../docs/kaggle-steam-store-bundle.md).
    - Proceed to authorized AWS deployment.
    - Captain decides final submission narrative scope.
 
@@ -133,16 +127,16 @@ Narration:
 | Is Compose valid? | `docker-compose.yml`, M8 ledger | See the [M8 evidence table](../docs/m8-final-local-evidence.md#evidence-bundle) for config/content-smoke results and conditions. |
 | Is Helm ready for review? | `deploy/helm/gamesense/`, M8 ledger | See the [M8 evidence table](../docs/m8-final-local-evidence.md#evidence-bundle) for lint/render results. |
 | Is Terraform ready for static review? | `infra/terraform/`, M8 ledger | See the [M8 evidence table](../docs/m8-final-local-evidence.md#evidence-bundle) for static validation results and limits. |
-| What data powers local recommendations? | `data/fixtures/ml/sample_games.self-authored.json`, `README.md`, `docs/ml-data-policy.md` | Tiny self-authored fixture only. |
-| Was real Kaggle/Steam data used? | `docs/m8-final-local-evidence.md`, `docs/ml-data-policy.md` | No. Real-data acquisition is deferred. |
-| Was a model trained or served? | `README.md`, `docs/ml-baseline-model-card.md`, M8 ledger | No trained model artifact or model serving is claimed. |
+| What data powers local recommendations? | `data/fixtures/ml/sample_games.self-authored.json`, `README.md`, `docs/ml-data-policy.md` | The M8/M9 evidence uses the self-authored fixture; see the [README](../README.md) for current serving options. |
+| Was real Kaggle/Steam data used? | `docs/m8-final-local-evidence.md`, `docs/ml-data-policy.md` | No real-data run is included in the M8/M9 evidence; see the [handoff guide](../docs/kaggle-steam-store-bundle.md) for the current workflow. |
+| Was a model trained or served? | `README.md`, `docs/ml-baseline-model-card.md`, M8 ledger | No returned artifact is included in this evidence; see the [README](../README.md) for current serving capabilities. |
 | Was AWS deployed? | `submission/M10-WALKTHROUGH.md`, M8 ledger | No. AWS/Kubernetes work remains external setup for later authorization. |
 
 ## Explicit non-claims for this package
 
 - No external Steam/Kaggle dataset was downloaded, ingested, redistributed, or used for training.
 - No Kaggle training job was run.
-- No embeddings, generated recommendation dataset, trained model file, or model-serving endpoint was produced.
+- No embeddings, generated recommendation dataset, or trained model file is included in the M8/M9 evidence. Current serving capabilities are documented in the [README](../README.md).
 - No Terraform plan/apply was run against AWS.
 - No EKS cluster, Argo CD app, Kubernetes workload, ingress, DNS/TLS, or cloud database was provisioned or verified.
 - No live Prometheus/Grafana production monitoring is claimed.

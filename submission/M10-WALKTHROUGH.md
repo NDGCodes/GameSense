@@ -19,7 +19,7 @@ Use this file while preparing the final submission. Do not mark cloud, cluster, 
 - Helm static validation: run `helm lint deploy/helm/gamesense`, `helm template gamesense deploy/helm/gamesense`, and `helm template gamesense-content deploy/helm/gamesense --set backend.recommender.mode=content`.
   - The default rendered chart keeps `RECOMMENDER_MODE=fixture`.
   - The content render sets `RECOMMENDER_MODE=content`, sets `CONTENT_FIXTURE_PATH=/app/data/fixtures/ml/sample_games.self-authored.json`, and mounts only the committed self-authored sample fixture from the chart artifact ConfigMap. The ConfigMap is annotated with the fixture path and SHA-256 checksum for review, but the backend does not enforce checksum verification at runtime.
-- Kaggle-compatible notebook smoke path: `notebooks/gamesense_baseline_kaggle.ipynb` runs the local baseline recommender and offline evaluation against `data/fixtures/ml/sample_games.self-authored.json` by default. This default is self-authored sample data only; it does not download Kaggle datasets, train or fine-tune a model, generate embeddings, or prove real-catalog accuracy.
+- Kaggle notebook and returned-bundle workflow: follow the [authoritative handoff guide](../docs/kaggle-steam-store-bundle.md). This is separate from the fixture-only local evidence below.
 - Terraform static validation: run `terraform -chdir=infra/terraform fmt -check -recursive`, `terraform -chdir=infra/terraform init -backend=false`, and `terraform -chdir=infra/terraform validate`.
 
 ## Evidence that still requires real external setup and has not been performed here
@@ -34,7 +34,7 @@ Use this file while preparing the final submission. Do not mark cloud, cluster, 
 - A configured `DATABASE_URL` Secret or a consciously accepted ephemeral SQLite demo mode for the cluster walkthrough.
 - Prometheus target confirmed `UP` in the deployed environment.
 - Grafana dashboard populated with live request and latency metrics from the deployed backend.
-- Kaggle or other external real-data run: first identify a specific data source, document its manifest, license, terms, redistribution/training/serving permissions, and approval status, then run the existing source-check/license gates. No real-data Kaggle run is claimed by this branch.
+- User-run Kaggle notebook and returned-bundle verification: follow the [handoff guide](../docs/kaggle-steam-store-bundle.md). No real-data Kaggle run is claimed by this checklist.
 - Submission video/slides that show only evidence actually captured from the environment being claimed.
 
 ## External prerequisites
@@ -48,9 +48,8 @@ Use this file while preparing the final submission. Do not mark cloud, cluster, 
 
 ## Out-of-scope for this phase
 
-- Downloading Steam or other third-party datasets before license and usage terms are verified.
-- Running the Kaggle notebook on unapproved attached data.
-- Training, serving, or tuning recommendation models.
+- External data use beyond the recorded scope in the [source manifest](../data/source-manifests/kaggle.steam-store-games-clean.json).
+- Accuracy tuning, fine-tuning, and deployment of generated artifacts.
 - Claiming production readiness, live cluster health, or monitoring evidence from local-only validation.
 
 ## Milestone 8 local evidence freeze
