@@ -135,6 +135,7 @@ def test_similar_fallback_excludes_seed_in_both_content_paths(
     result = recommender_service._content_recommendations(mode="similar", favorite_game="seed", limit=3)
     assert result.fallbackReason == "similar_no_candidates"
     assert [game.slug for game in result.recommendations] == expected_slugs
+    assert "Cozy fallback" in result.explanation
 
     bundle_path = tmp_path / "fallback.zip"
     manifest = json.loads(KAGGLE_MANIFEST.read_text(encoding="utf-8"))
@@ -144,6 +145,7 @@ def test_similar_fallback_excludes_seed_in_both_content_paths(
     )
     assert result.fallbackReason == "similar_no_candidates"
     assert [game.slug for game in result.recommendations] == expected_slugs
+    assert "Cozy fallback" in result.explanation
 
 
 def test_load_bundle_rejects_id_mapping_mismatch(tmp_path: Path) -> None:

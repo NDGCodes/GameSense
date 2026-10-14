@@ -32,8 +32,8 @@ function App() {
       .then(games => {
         setCatalog(games);
         setCatalogStatus(`${games.length} catalog options loaded`);
-        if (games.length > 0 && favoriteGame === 'Cozy Comet Cafe') {
-          setFavoriteGame(games[0].slug);
+        if (games.length > 0) {
+          setFavoriteGame(current => current === 'Cozy Comet Cafe' ? games[0].slug : current);
         }
       })
       .catch(() => setCatalogStatus('catalog unavailable'));

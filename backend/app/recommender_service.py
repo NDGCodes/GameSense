@@ -298,6 +298,8 @@ def _content_explanation(mode: RecommendationMode, baseline_mode: BaselineRecomm
         return "Content mode has no real trend signal, so it ranks the self-authored sample with the baseline non-trending text/tag scorer."
     if mode == "similar" and not has_seed:
         return "The favorite game was not found in the self-authored sample, so content mode falls back to source-grounded sample recommendations."
+    if mode == "similar" and baseline_mode == "cozy":
+        return "No similar candidates were found; the Cozy fallback ranks the self-authored sample by cozy text, genres, and tags, excluding the selected seed."
     if mode == "similar":
         return "Ranks the self-authored sample by text, genre, and tag overlap with the matched favorite game."
     return f"Ranks the self-authored sample with the baseline {baseline_mode} text, genre, and tag scorer."
@@ -308,6 +310,8 @@ def _bundle_explanation(mode: RecommendationMode, baseline_mode: BaselineRecomme
         return "The selected snapshot has no live trend signal, so this mode returns deterministic catalog picks using fitted TF-IDF/tag features plus historical source popularity fields when present."
     if mode == "similar" and not has_seed:
         return "The favorite game was not found in the loaded catalog snapshot, so the app falls back to source-grounded catalog recommendations from the same bundle."
+    if mode == "similar" and baseline_mode == "cozy":
+        return "No similar candidates were found; the Cozy fallback ranks the same loaded catalog snapshot by cozy TF-IDF, genre, and tag signals plus historical popularity, excluding the selected seed."
     if mode == "similar":
         return "Ranks games from the same loaded catalog snapshot by fitted TF-IDF text similarity plus genre/tag overlap, excluding the selected seed."
     return f"Ranks games from the same loaded catalog snapshot with the baseline {baseline_mode} TF-IDF, genre, and tag scorer."
