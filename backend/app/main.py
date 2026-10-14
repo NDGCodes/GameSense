@@ -4,13 +4,10 @@ from time import perf_counter
 from fastapi import Depends, FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from prometheus_client import CONTENT_TYPE_LATEST, Counter, Gauge, Histogram, generate_latest
-from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
-from app.catalog import list_active_games, to_game_out
 from app.db import database_is_ready, get_session
-from app.models import Game
-from app.recommender_service import recommend_for_api
+from app.recommender_service import active_catalog_count_for_api, list_games_for_api, recommend_for_api
 from app.schemas import (
     GameOut,
     HealthResponse,
@@ -99,7 +96,7 @@ def health() -> HealthResponse:
 @app.get("/ready", response_model=ReadinessResponse)
 def ready(session: Session = Depends(get_session)) -> ReadinessResponse:
     database_is_ready(session)
-    count = session.scalar(select(func.count()).select_from(Game).where(Game.is_active.is_(True))) or 0
+    count = active_catalog_count_for_api(session)
     DEMO_CATALOG_GAMES.set(count)
     return ReadinessResponse(
         status="ok",
@@ -110,10 +107,10 @@ def ready(session: Session = Depends(get_session)) -> ReadinessResponse:
 
 
 @app.get("/api/games", response_model=list[GameOut])
-def games(session: Session = Depends(get_session)) -> list[GameOut]:
-    catalog = list_active_games(session)
+def games(limit: int = 500, q: str | None = None, session: Session = Depends(get_session)) -> list[GameOut]:
+    catalog = list_games_for_api(session, limit=max(1, min(limit, 1000)), query=q)
     DEMO_CATALOG_GAMES.set(len(catalog))
-    return [to_game_out(game) for game in catalog]
+    return catalog
 
 
 @app.post("/api/recommendations", response_model=RecommendationResponse)
@@ -123,8 +120,8 @@ def recommendations(
 ) -> RecommendationResponse:
     start = perf_counter()
     result = recommend_for_api(session, mode=payload.mode, favorite_game=payload.favorite_game)
-    demo_catalog_count = session.scalar(select(func.count()).select_from(Game).where(Game.is_active.is_(True))) or 0
-    DEMO_CATALOG_GAMES.set(demo_catalog_count)
+    visible_catalog_count = active_catalog_count_for_api(session)
+    DEMO_CATALOG_GAMES.set(visible_catalog_count)
     RECOMMENDATION_CATALOG_ITEMS.labels(algorithm=result.algorithm, data_snapshot=result.dataSnapshot).set(result.catalogItems)
     RECOMMENDATION_MODEL_INFO.labels(
         algorithm=result.algorithm,

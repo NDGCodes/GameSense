@@ -8,7 +8,7 @@ GameSense is preparing for a future hybrid recommender that may combine dense de
 - Every source considered for ML work must have a manifest under `data/source-manifests/` that records provenance, license or terms, attribution requirements, allowed uses, retrieval/version/hash details, and review state.
 - Raw datasets belong under ignored local paths such as `data/raw/` or `data/external/`; derived features and model artifacts belong under ignored local paths such as `data/processed/`, `models/`, or `artifacts/models/`.
 - Only tiny, intentional fixtures may be committed. They must be self-authored or otherwise clearly licensed for repository use, and must state their purpose.
-- If license terms, redistribution rights, attribution, or model-training rights are unclear, keep the review state unapproved and do not use the source for training, evaluation, or demos.
+- If license terms, redistribution rights, attribution, or model-training rights are unclear, keep the review state unapproved and do not use the source for training, evaluation, or demos unless the captain explicitly accepts the disclosed uncertainty for a narrow recorded scope. A scoped acceptance is not legal clearance and must not be described as unrestricted redistribution rights.
 
 ## Future hybrid recommender notes
 

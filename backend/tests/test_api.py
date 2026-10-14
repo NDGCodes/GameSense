@@ -1,3 +1,4 @@
+import json
 from pathlib import Path
 import sys
 
@@ -12,6 +13,9 @@ sys.path.insert(0, str(BACKEND_ROOT))
 
 from app.db import get_session  # noqa: E402
 from app.main import app  # noqa: E402
+from app.ml_bundle import build_tfidf_content_bundle  # noqa: E402
+from app.ml_pipeline import normalize_steam_store_games  # noqa: E402
+from app.recommender_service import clear_content_bundle_cache  # noqa: E402
 
 
 def run_migrations(database_url: str) -> None:
@@ -110,6 +114,56 @@ def test_content_recommender_fallback_metric_uses_bounded_reason(tmp_path: Path,
     metrics = client.get("/metrics").text
     assert 'gamesense_recommendation_fallbacks_total{algorithm="content-baseline-rrf",reason="similar_seed_not_found"}' in metrics
     assert "Unknown Game" not in metrics
+
+
+def test_content_recommender_loads_returned_bundle_for_catalog_and_recommendations(tmp_path: Path, monkeypatch) -> None:
+    dataset_dir = tmp_path / "steam-sample"
+    dataset_dir.mkdir()
+    (dataset_dir / "steam.csv").write_text(
+        "appid,name,release_date,english,developer,publisher,platforms,categories,genres,steamspy_tags,positive,negative,average_playtime,median_playtime,owners,price\n"
+        "10,Forest Farm,May 1 2019,1,Example Dev,Example Pub,windows,Single-player,Simulation;Indie,Relaxing;Farming;Crafting,120,5,42,30,20000 .. 50000,9.99\n"
+        "20,Harbor Builder,Apr 4 2018,1,Example Dev,Example Pub,windows,Single-player,Simulation;Strategy,Management;Crafting;Relaxing,80,10,50,35,20000 .. 50000,12.99\n"
+        "30,Arena Rockets,Mar 3 2017,1,Example Dev,Example Pub,windows,Multi-player;Co-op,Action;Sports,Competitive;Co-op;Teamwork,200,20,60,40,50000 .. 100000,0\n",
+        encoding="utf-8",
+    )
+    (dataset_dir / "steam_description_data.csv").write_text(
+        "steam_appid,short_description\n"
+        "10,Plant crops and craft gentle farm upgrades.\n"
+        "20,Build a cozy harbor with workshops and markets.\n"
+        "30,Fast team arenas with rocket jumps and co-op drills.\n",
+        encoding="utf-8",
+    )
+    manifest_path = Path(__file__).resolve().parents[2] / "data/source-manifests/kaggle.steam-store-games-clean.json"
+    normalized = normalize_steam_store_games(manifest_path, dataset_dir)
+    bundle_path = tmp_path / "bundle.zip"
+    build_tfidf_content_bundle(
+        games=normalized["games"],
+        source_manifest=json.loads(manifest_path.read_text(encoding="utf-8")),
+        output_path=bundle_path,
+        generated_at="2026-10-14T00:00:00Z",
+    )
+
+    monkeypatch.setenv("RECOMMENDER_MODE", "content")
+    monkeypatch.setenv("CONTENT_BUNDLE_PATH", str(bundle_path))
+    clear_content_bundle_cache()
+    client = build_test_client(tmp_path)
+
+    catalog_response = client.get("/api/games?limit=10&q=Harbor")
+    assert catalog_response.status_code == 200
+    catalog = catalog_response.json()
+    assert [game["slug"] for game in catalog] == ["steam-20"]
+    assert catalog[0]["source"] == "kaggle.steam-store-games-clean"
+    assert "loaded Kaggle snapshot bundle" in catalog[0]["reason"]
+
+    response = client.post("/api/recommendations", json={"mode": "similar", "favorite_game": "Forest Farm"})
+    assert response.status_code == 200
+    payload = response.json()
+    slugs = [game["slug"] for game in payload["recommendations"]]
+    assert "steam-10" not in slugs
+    assert payload["algorithm"] == "tfidf-tag-content-baseline"
+    assert payload["dataSnapshot"] == "kaggle.steam-store-games-clean-local-snapshot"
+    assert "historical" in payload["disclosure"].lower()
+    assert {game["source"] for game in payload["recommendations"]} == {"kaggle.steam-store-games-clean"}
 
 
 def test_readiness_checks_database_and_counts_catalog(tmp_path: Path) -> None:

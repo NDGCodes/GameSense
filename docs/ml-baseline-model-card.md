@@ -44,14 +44,16 @@ The evaluation can support narrow engineering claims such as:
 
 The evaluation **does not** support claims about real-world recommendation quality, relevance, personalization, marketplace coverage, ranking fairness, robustness, retention, conversion, or user satisfaction.
 
-## Limitations
+## Limitations of the fixture evaluation
+
+The returned Kaggle bundle is a separate fitted component; see the [handoff guide](kaggle-steam-store-bundle.md) for its workflow and limitations.
 
 - No real Steam catalog, real game catalog, or external catalog data is used.
 - No user-interaction logs, ratings, clicks, purchases, wishlists, or relevance labels are used.
 - No model training, fine-tuning, generated embeddings, model weights, or learned parameters are produced.
 - The fixture has only two fictional records, so metrics are smoke checks rather than statistically meaningful estimates.
 - Synthetic vectors are hand-authored test inputs and are not evidence that any embedding model performs well.
-- API/frontend serving can expose this component only as a labeled content baseline via `RECOMMENDER_MODE=content`; it is not a production recommender.
+- Current API/frontend serving options are described in the [README](../README.md#kaggle-content-bundle-handoff); fixture evaluation does not establish production readiness.
 
 ## Validation performed
 

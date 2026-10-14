@@ -7,7 +7,7 @@ RecommendationMode = Literal["similar", "trending", "cozy", "competitive"]
 
 class RecommendationRequest(BaseModel):
     mode: RecommendationMode = "trending"
-    favorite_game: str | None = Field(default=None, max_length=120)
+    favorite_game: str | None = Field(default=None, max_length=240)
 
 
 class GameOut(BaseModel):

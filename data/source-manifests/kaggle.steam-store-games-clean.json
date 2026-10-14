@@ -1,0 +1,52 @@
+{
+  "manifestVersion": 1,
+  "sourceId": "kaggle.steam-store-games-clean",
+  "name": "Steam Store Games (Clean dataset)",
+  "provenance": {
+    "origin": "https://www.kaggle.com/datasets/nikdavis/steam-store-games",
+    "sourceType": "public-dataset",
+    "collectedBy": "Kaggle dataset author Nik Davis",
+    "collectionMethod": "Kaggle page describes combined Steam Store and SteamSpy API data for roughly 27,000 games, gathered around May 2019.",
+    "notes": "The user/captain accepted the disclosed CC BY 4.0 attribution obligation and unresolved underlying Steam/SteamSpy terms uncertainty only for a local Kaggle notebook run and local GameSense app demo. No raw dataset or generated bundle is committed here."
+  },
+  "licenseAndTerms": {
+    "licenseName": "Attribution 4.0 International (CC BY 4.0) as listed on Kaggle",
+    "termsUrl": "https://www.kaggle.com/datasets/nikdavis/steam-store-games",
+    "redistributionAllowed": false,
+    "trainingAllowed": true,
+    "commercialUseAllowed": false,
+    "uncertainties": [
+      "The Kaggle listing says CC BY 4.0, but the data is described as scraped/combined from Steam Store and SteamSpy APIs, so upstream Steam/SteamSpy terms remain unresolved.",
+      "The accepted scope is a local notebook fit/evaluation and local app demo with attribution, not unrestricted redistribution of raw data or generated artifacts.",
+      "The snapshot is historical, gathered around May 2019, and must not be represented as current Steam catalog or live trending data."
+    ]
+  },
+  "attribution": {
+    "required": true,
+    "text": "Steam Store Games (Clean dataset) by Nik Davis on Kaggle, listed as CC BY 4.0; data described by the Kaggle page as Steam Store/SteamSpy-derived and gathered around May 2019."
+  },
+  "allowedUses": {
+    "commitToRepository": false,
+    "localDevelopment": true,
+    "ci": false,
+    "training": true,
+    "evaluation": true,
+    "serving": true,
+    "notes": "Allowed only for the user-run Kaggle notebook, returned local model/catalog bundle, and local app demo with attribution and limitations. Keep raw data and generated bundles out of git."
+  },
+  "retrieval": {
+    "retrievedAt": "user-attached-at-kaggle-runtime",
+    "version": "Kaggle dataset page snapshot; actual file hashes are recorded by the notebook run report",
+    "uri": null,
+    "contentHash": {
+      "algorithm": "sha256",
+      "value": "0000000000000000000000000000000000000000000000000000000000000000"
+    }
+  },
+  "review": {
+    "state": "approved",
+    "reviewedBy": "captain-accepted-disclosed-scope",
+    "reviewedAt": "2026-10-14",
+    "notes": "Approved only for the disclosed local notebook/app-demo scope. This is not legal clearance and does not authorize unrestricted redistribution."
+  }
+}
