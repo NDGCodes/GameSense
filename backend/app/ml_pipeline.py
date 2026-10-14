@@ -361,6 +361,8 @@ def _top_tag_columns(row: Mapping[str, str], *, excluded: set[str], limit: int =
 
 
 def normalize_steam_store_games(manifest_path: Path, dataset_dir: Path, *, limit: int | None = None) -> dict[str, Any]:
+    from app.game_images import steam_app_id, steam_image_url
+
     source_report = steam_store_source_check(manifest_path)
     if not source_report["ok"]:
         raise PipelineError("Steam Store Games source manifest is not approved for the local bundle scope")
@@ -371,6 +373,7 @@ def normalize_steam_store_games(manifest_path: Path, dataset_dir: Path, *, limit
         raise PipelineError(f"expected Kaggle steam.csv at {steam_csv}")
     descriptions = _index_rows(_read_csv(dataset_dir / "steam_description_data.csv"), ("steam_appid", "appid"))
     steamspy_tags = _index_rows(_read_csv(dataset_dir / "steamspy_tag_data.csv"), ("appid", "steam_appid"))
+    media = _index_rows(_read_csv(dataset_dir / "steam_media_data.csv"), ("steam_appid", "appid"))
 
     games: list[dict[str, Any]] = []
     skipped = {"missingIdOrTitle": 0, "duplicateAppId": 0}
@@ -398,6 +401,8 @@ def normalize_steam_store_games(manifest_path: Path, dataset_dir: Path, *, limit
         tag_row = steamspy_tags.get(appid, {})
         tags.extend(_top_tag_columns(tag_row, excluded={"appid", "steam_appid"}))
         tags = _split_multi(";".join(tags))
+        valid_app_id = steam_app_id(appid)
+        image_url = steam_image_url(media.get(appid, {}).get("header_image") or row.get("header_image"), appid) if valid_app_id else None
         game = CatalogGameSchema.model_validate(
             {
                 "sourceId": manifest.sourceId,
@@ -412,6 +417,7 @@ def normalize_steam_store_games(manifest_path: Path, dataset_dir: Path, *, limit
                 "metadata": {
                     "inputRowNumber": raw_index,
                     "steamAppId": appid,
+                    "imageUrl": image_url,
                     "sourceUrl": f"https://store.steampowered.com/app/{appid}/",
                     "developer": row.get("developer") or None,
                     "publisher": row.get("publisher") or None,
@@ -422,7 +428,7 @@ def normalize_steam_store_games(manifest_path: Path, dataset_dir: Path, *, limit
                     "medianPlaytime": _parse_float(row.get("median_playtime")),
                     "price": _parse_float(row.get("price")),
                     "contentBundleScore": _catalog_score(row),
-                    "sourceFiles": ["steam.csv", "steam_description_data.csv", "steamspy_tag_data.csv"],
+                    "sourceFiles": ["steam.csv", "steam_description_data.csv", "steamspy_tag_data.csv", *(["steam_media_data.csv"] if media else [])],
                 },
                 "isActive": True,
             }
@@ -442,6 +448,7 @@ def normalize_steam_store_games(manifest_path: Path, dataset_dir: Path, *, limit
             "steam.csv": str(steam_csv),
             "steam_description_data.csv": str(dataset_dir / "steam_description_data.csv"),
             "steamspy_tag_data.csv": str(dataset_dir / "steamspy_tag_data.csv"),
+            "steam_media_data.csv": str(dataset_dir / "steam_media_data.csv"),
         },
         "sourceReport": source_report,
         "games": games,

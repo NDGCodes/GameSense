@@ -11,6 +11,7 @@ from sqlalchemy.orm import Session
 
 from app.catalog import FIXTURE_NOTICE, MODE_EXPLANATIONS, list_active_games, recommend_games, to_game_out
 from app.models import Game
+from app.game_images import game_image_fields
 from app.ml_bundle import BundleError, LoadedContentBundle, load_content_bundle
 from app.recommender import (
     BASELINE_RECOMMENDER_VERSION,
@@ -319,6 +320,7 @@ def _bundle_explanation(mode: RecommendationMode, baseline_mode: BaselineRecomme
 
 def _to_content_catalog_game_out(game: CatalogGameSchema) -> GameOut:
     return GameOut(
+        **game_image_fields(game),
         slug=game.slug,
         title=game.title,
         shortDescription=game.description or "Self-authored sample game record.",
@@ -330,6 +332,7 @@ def _to_content_catalog_game_out(game: CatalogGameSchema) -> GameOut:
 
 def _to_bundle_catalog_game_out(bundle: LoadedContentBundle, game: CatalogGameSchema) -> GameOut:
     return GameOut(
+        **game_image_fields(game),
         slug=game.slug,
         title=game.title,
         shortDescription=game.description or "No description was available in the normalized snapshot.",
@@ -341,6 +344,7 @@ def _to_bundle_catalog_game_out(bundle: LoadedContentBundle, game: CatalogGameSc
 
 def _to_bundle_game_out(game: CatalogGameSchema, item) -> GameOut:
     return GameOut(
+        **game_image_fields(game),
         slug=game.slug,
         title=game.title,
         shortDescription=game.description or "No description was available in the normalized snapshot.",
@@ -352,6 +356,7 @@ def _to_bundle_game_out(game: CatalogGameSchema, item) -> GameOut:
 
 def _to_content_game_out(game: CatalogGameSchema, item) -> GameOut:
     return GameOut(
+        **game_image_fields(game),
         slug=game.slug,
         title=game.title,
         shortDescription=game.description or "Self-authored sample game record.",

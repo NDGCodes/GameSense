@@ -71,6 +71,7 @@ def test_recommendations_come_from_demo_database_fixtures(tmp_path: Path, monkey
     assert payload["disclosure"] == payload["fixtureNotice"]
     assert len(payload["recommendations"]) >= 2
     assert {game["source"] for game in payload["recommendations"]} == {"demo-fixture"}
+    assert all(game["imageUrl"] is None and game["steamAppId"] is None for game in payload["recommendations"])
 
 
 def test_content_recommender_mode_uses_self_authored_sample_and_grounded_reasons(tmp_path: Path, monkeypatch) -> None:
@@ -153,12 +154,17 @@ def test_content_recommender_loads_returned_bundle_for_catalog_and_recommendatio
     catalog = catalog_response.json()
     assert [game["slug"] for game in catalog] == ["steam-20"]
     assert catalog[0]["source"] == "kaggle.steam-store-games-clean"
+    assert catalog[0]["steamAppId"] == "20"
+    assert catalog[0]["imageUrl"].endswith("/20/header.jpg")
     assert "loaded Kaggle snapshot bundle" in catalog[0]["reason"]
 
     response = client.post("/api/recommendations", json={"mode": "similar", "favorite_game": "Forest Farm"})
     assert response.status_code == 200
     payload = response.json()
     slugs = [game["slug"] for game in payload["recommendations"]]
+    for game in payload["recommendations"]:
+        assert game["slug"] == f"steam-{game['steamAppId']}"
+        assert game["imageUrl"].endswith(f"/{game['steamAppId']}/header.jpg")
     assert "steam-10" not in slugs
     assert payload["algorithm"] == "tfidf-tag-content-baseline"
     assert payload["dataSnapshot"] == "kaggle.steam-store-games-clean-local-snapshot"
