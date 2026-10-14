@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import './styles.css';
+import GameArtwork from './GameArtwork';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
 const modes = [
@@ -83,13 +84,17 @@ function App() {
         <p>{result.explanation}</p>
         {result.recommendations.length === 0 && <p className="notice">No recommendations were returned for this selection.</p>}
         <div className="cards">
-          {result.recommendations.map(game => <article key={game.slug}>
-            <div className="card-header"><h2>{game.title}</h2><span>{game.source}</span></div>
-            <p>{game.shortDescription}</p>
-            <p className="genres">{game.genres.join(' · ')}</p>
-            <p className="reason"><strong>Why this appears:</strong> {game.reason}</p>
+          {result.recommendations.map(game => <article key={`${game.source}:${game.slug}`}>
+            <GameArtwork game={game} />
+            <div className="card-content">
+              <div className="card-header"><h2>{game.title}</h2><span>{game.source}</span></div>
+              <p>{game.shortDescription}</p>
+              <p className="genres">{game.genres.join(' · ')}</p>
+              <p className="reason"><strong>Why this appears:</strong> {game.reason}</p>
+            </div>
           </article>)}
         </div>
+        {result.recommendations.length > 0 && <p className="artwork-notice">Artwork loads from Steam when available. Publisher artwork rights are separate from the catalog dataset license; missing covers use a title placeholder.</p>}
       </div>}
     </section>
   </main>;

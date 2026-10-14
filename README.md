@@ -136,10 +136,10 @@ Implemented in this slice:
 - [x] M9 local submission package and walkthrough checklist that separate local evidence from cloud evidence.
 - [x] Local baseline recommender and offline smoke evaluation/model card for the tiny self-authored fixture.
 - [x] Kaggle notebook handoff and local content-bundle loader for the selected Steam Store Games source, with attribution and uncertainty disclosures.
+- [x] Responsive recommendation cover cards with identity-bound Steam image metadata and missing-artwork placeholders for the local demo.
 
 Deferred until the later authorized phases:
 
 - [ ] Returned real bundle import/verification after the user runs the notebook on Kaggle.
 - [ ] Accuracy tuning, fine-tuning, generated artifact deployment, or real-data quality claims.
 - [ ] Production database provisioning, secrets management, TLS, DNS, and live AWS deployment.
-- [ ] UI/design refinement beyond the functional infrastructure slice.

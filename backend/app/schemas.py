@@ -17,6 +17,8 @@ class GameOut(BaseModel):
     genres: list[str]
     source: str
     reason: str
+    steamAppId: str | None = None
+    imageUrl: str | None = None
 
 
 class RecommendationResponse(BaseModel):

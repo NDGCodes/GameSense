@@ -105,6 +105,41 @@ def test_export_import_bundle_validates_alignment_and_recommends_from_same_snaps
     assert "Steam Store Games" in bundle.disclosure
 
 
+def test_media_metadata_survives_normalize_export_load_and_inference(tmp_path: Path, monkeypatch) -> None:
+    from app.recommender_service import clear_content_bundle_cache, list_games_for_api, recommend_for_api
+
+    write_tiny_steam_dataset(tmp_path / "dataset")
+    url = "https://cdn.akamai.steamstatic.com/steam/apps/10/header.jpg?sample=1"
+    (tmp_path / "dataset/steam_media_data.csv").write_text(
+        f"steam_appid,header_image\n10,{url}\n20,https://cdn.akamai.steamstatic.com/steam/apps/30/header.jpg\n",
+        encoding="utf-8",
+    )
+    normalized = normalize_steam_store_games(KAGGLE_MANIFEST, tmp_path / "dataset")
+    assert normalized["games"][0]["metadata"]["imageUrl"] == url
+    assert normalized["games"][1]["metadata"]["imageUrl"] is None
+    bundle_path = tmp_path / "images.zip"
+    build_tfidf_content_bundle(
+        games=normalized["games"], source_manifest=json.loads(KAGGLE_MANIFEST.read_text()), output_path=bundle_path,
+    )
+    bundle = load_content_bundle(bundle_path)
+    assert bundle.catalog[0].metadata["imageUrl"] == url
+    assert [(item.slug, item.sourceGameId) for item in bundle.catalog] == [("steam-10", "10"), ("steam-20", "20"), ("steam-30", "30")]
+    monkeypatch.setenv("RECOMMENDER_MODE", "content")
+    monkeypatch.setenv("CONTENT_BUNDLE_PATH", str(bundle_path))
+    clear_content_bundle_cache()
+    catalog = {item.slug: item for item in list_games_for_api(None)}
+    assert catalog["steam-10"].imageUrl == url
+    assert catalog["steam-20"].imageUrl.endswith("/20/header.jpg")
+    for mode in ("trending", "similar", "cozy", "competitive"):
+        response = recommend_for_api(None, mode=mode, favorite_game="steam-10")
+        assert response.recommendations
+        for item in response.recommendations:
+            assert item.imageUrl == catalog[item.slug].imageUrl
+            assert item.steamAppId == catalog[item.slug].steamAppId
+        if mode == "similar":
+            assert "steam-10" not in {item.slug for item in response.recommendations}
+
+
 def test_catalog_uses_only_documented_bundle_configuration(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     from app.recommender_service import list_games_for_api
 
