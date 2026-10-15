@@ -16,6 +16,7 @@ def test_legacy_bundle_identity_provides_same_id_image_without_title_matching():
     assert fields == {
         "steamAppId": "900000001",
         "imageUrl": "https://cdn.akamai.steamstatic.com/steam/apps/900000001/header.jpg",
+        "imageFallbackUrl": "https://cdn.akamai.steamstatic.com/steam/apps/900000001/capsule_231x87.jpg",
     }
     assert game_image_fields(game(title="A completely different title")) == fields
 
@@ -23,6 +24,18 @@ def test_legacy_bundle_identity_provides_same_id_image_without_title_matching():
 def test_dataset_image_metadata_takes_precedence_for_exact_game():
     url = "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/900000001/abc123/header.jpg?t=1"
     assert game_image_fields(game(metadata={"imageUrl": url}))["imageUrl"] == url
+
+
+def test_duplicate_titles_keep_distinct_identity_bound_covers():
+    first = game(sourceGameId="900000001", title="Same title")
+    second = game(sourceGameId="900000002", title="Same title")
+    for record in (second, first, second):
+        fields = game_image_fields(record)
+        assert fields["steamAppId"] == record.sourceGameId
+        assert fields["imageUrl"] == (
+            f"https://cdn.akamai.steamstatic.com/steam/apps/{record.sourceGameId}/header.jpg"
+        )
+        assert fields["imageFallbackUrl"].endswith(f"/{record.sourceGameId}/capsule_231x87.jpg")
 
 
 @pytest.mark.parametrize("overrides", [
@@ -33,7 +46,9 @@ def test_dataset_image_metadata_takes_precedence_for_exact_game():
     {"metadata": {"steamAppId": "900000002"}},
 ])
 def test_unknown_or_inconsistent_identity_has_no_artwork(overrides):
-    assert game_image_fields(game(**overrides)) == {"steamAppId": None, "imageUrl": None}
+    assert game_image_fields(game(**overrides)) == {
+        "steamAppId": None, "imageUrl": None, "imageFallbackUrl": None,
+    }
 
 
 @pytest.mark.parametrize("url", [

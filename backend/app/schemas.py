@@ -19,6 +19,7 @@ class GameOut(BaseModel):
     reason: str
     steamAppId: str | None = None
     imageUrl: str | None = None
+    imageFallbackUrl: str | None = None
 
 
 class RecommendationResponse(BaseModel):

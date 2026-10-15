@@ -41,7 +41,7 @@ def steam_image_url(value: object, app_id: str) -> str | None:
 
 
 def game_image_fields(game: CatalogGameSchema) -> dict[str, str | None]:
-    empty = {"steamAppId": None, "imageUrl": None}
+    empty = {"steamAppId": None, "imageUrl": None, "imageFallbackUrl": None}
     if game.sourceId != STEAM_SOURCE_ID:
         return empty
     app_id = steam_app_id(game.sourceGameId)
@@ -52,4 +52,6 @@ def game_image_fields(game: CatalogGameSchema) -> dict[str, str | None]:
     return {
         "steamAppId": app_id,
         "imageUrl": image_url or f"https://cdn.akamai.steamstatic.com/steam/apps/{app_id}/header.jpg",
+        # Some historical apps retain a small capsule even when their header is gone.
+        "imageFallbackUrl": f"https://cdn.akamai.steamstatic.com/steam/apps/{app_id}/capsule_231x87.jpg",
     }

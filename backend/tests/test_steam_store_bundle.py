@@ -136,6 +136,8 @@ def test_media_metadata_survives_normalize_export_load_and_inference(tmp_path: P
         for item in response.recommendations:
             assert item.imageUrl == catalog[item.slug].imageUrl
             assert item.steamAppId == catalog[item.slug].steamAppId
+            assert item.imageFallbackUrl == catalog[item.slug].imageFallbackUrl
+            assert item.imageFallbackUrl.endswith(f"/{item.steamAppId}/capsule_231x87.jpg")
         if mode == "similar":
             assert "steam-10" not in {item.slug for item in response.recommendations}
 
