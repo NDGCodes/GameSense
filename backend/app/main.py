@@ -107,8 +107,8 @@ def ready(session: Session = Depends(get_session)) -> ReadinessResponse:
 
 
 @app.get("/api/games", response_model=list[GameOut])
-def games(limit: int = 500, q: str | None = None, session: Session = Depends(get_session)) -> list[GameOut]:
-    catalog = list_games_for_api(session, limit=max(1, min(limit, 1000)), query=q)
+def games(limit: int = 500, offset: int = 0, q: str | None = None, session: Session = Depends(get_session)) -> list[GameOut]:
+    catalog = list_games_for_api(session, limit=max(1, min(limit, 1000)), offset=max(0, offset), query=q)
     DEMO_CATALOG_GAMES.set(len(catalog))
     return catalog
 
@@ -119,7 +119,7 @@ def recommendations(
     session: Session = Depends(get_session),
 ) -> RecommendationResponse:
     start = perf_counter()
-    result = recommend_for_api(session, mode=payload.mode, favorite_game=payload.favorite_game)
+    result = recommend_for_api(session, mode=payload.mode, favorite_game=payload.favorite_game, limit=payload.limit)
     visible_catalog_count = active_catalog_count_for_api(session)
     DEMO_CATALOG_GAMES.set(visible_catalog_count)
     RECOMMENDATION_CATALOG_ITEMS.labels(algorithm=result.algorithm, data_snapshot=result.dataSnapshot).set(result.catalogItems)

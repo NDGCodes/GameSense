@@ -162,7 +162,12 @@ def test_content_recommender_loads_returned_bundle_for_catalog_and_recommendatio
     assert catalog[0]["imageFallbackUrl"].endswith("/20/capsule_231x87.jpg")
     assert "loaded Kaggle snapshot bundle" in catalog[0]["reason"]
 
-    response = client.post("/api/recommendations", json={"mode": "similar", "favorite_game": "Forest Farm"})
+    first_page = client.get("/api/games?limit=1&offset=0").json()
+    second_page = client.get("/api/games?limit=1&offset=1").json()
+    assert len(first_page) == len(second_page) == 1
+    assert first_page[0]["slug"] != second_page[0]["slug"]
+
+    response = client.post("/api/recommendations", json={"mode": "similar", "favorite_game": "Forest Farm", "limit": 9})
     assert response.status_code == 200
     payload = response.json()
     slugs = [game["slug"] for game in payload["recommendations"]]
@@ -171,6 +176,7 @@ def test_content_recommender_loads_returned_bundle_for_catalog_and_recommendatio
         assert game["imageUrl"].endswith(f"/{game['steamAppId']}/header.jpg")
         assert game["imageFallbackUrl"].endswith(f"/{game['steamAppId']}/capsule_231x87.jpg")
     assert "steam-10" not in slugs
+    assert len(slugs) == 2
     assert payload["algorithm"] == "tfidf-tag-content-baseline"
     assert payload["dataSnapshot"] == "kaggle.steam-store-games-clean-local-snapshot"
     assert "historical" in payload["disclosure"].lower()
