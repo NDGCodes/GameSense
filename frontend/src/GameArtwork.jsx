@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
 
-function Artwork({ game }) {
+function Artwork({ game, preferPortrait }) {
   const [attempt, setAttempt] = useState(0);
-  const urls = [...new Set([game.imageUrl, game.imageFallbackUrl].filter(Boolean))];
+  const portraitUrl = preferPortrait && /^\d+$/.test(game.steamAppId || '')
+    ? `https://cdn.akamai.steamstatic.com/steam/apps/${game.steamAppId}/library_600x900.jpg`
+    : null;
+  const urls = [...new Set([portraitUrl, game.imageUrl, game.imageFallbackUrl].filter(Boolean))];
   const imageUrl = urls[attempt];
 
   return <div className="game-artwork">
@@ -24,7 +27,7 @@ function Artwork({ game }) {
   </div>;
 }
 
-export default function GameArtwork({ game }) {
+export default function GameArtwork({ game, preferPortrait = false }) {
   // Remount when identity or candidate URLs change so an earlier failure cannot leak.
-  return <Artwork key={JSON.stringify([game.source, game.slug, game.imageUrl, game.imageFallbackUrl])} game={game} />;
+  return <Artwork key={JSON.stringify([game.source, game.slug, game.steamAppId, game.imageUrl, game.imageFallbackUrl, preferPortrait])} game={game} preferPortrait={preferPortrait} />;
 }
