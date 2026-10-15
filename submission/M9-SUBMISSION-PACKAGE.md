@@ -87,7 +87,7 @@ Show the [Kaggle handoff guide](../docs/kaggle-steam-store-bundle.md) for the cu
 
 Narration:
 
-> The local scope is packaged for review: app, tests, build, local containers, static IaC, Helm/GitOps manifests, local observability, and fixture-only recommender evidence. Follow the authoritative Kaggle handoff guide for the next notebook run and returned-bundle integration; AWS deployment requires separate authorization. The final story and submission narrative scope remain a captain decision.
+> The local scope is packaged for review: app, tests, build, local containers, static IaC, Helm/GitOps manifests, local observability, and fixture-only recommender evidence. Follow the [authoritative Kaggle handoff guide](../docs/kaggle-steam-store-bundle.md) for current returned-bundle and artwork verification status beyond this package; AWS deployment requires separate authorization. The final story and submission narrative scope remain a captain decision.
 
 ## Slide outline
 

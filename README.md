@@ -137,9 +137,9 @@ Implemented in this slice:
 - [x] Local baseline recommender and offline smoke evaluation/model card for the tiny self-authored fixture.
 - [x] Kaggle notebook handoff and local content-bundle loader for the selected Steam Store Games source, with attribution and uncertainty disclosures.
 - [x] Responsive recommendation cover cards with identity-bound Steam headers, same-game capsule fallback, and missing-artwork placeholders for the local demo.
+- [x] Returned real bundle imported and catalog artwork checked locally; see [coverage evidence and repeatable checks](docs/kaggle-steam-store-bundle.md#verified-catalog-artwork).
 
 Deferred until the later authorized phases:
 
-- [x] Returned real bundle imported and all 27,075 catalog artwork mappings checked locally; see [coverage evidence and repeatable checks](docs/kaggle-steam-store-bundle.md#verified-catalog-artwork).
 - [ ] Accuracy tuning, fine-tuning, generated artifact deployment, or real-data quality claims.
 - [ ] Production database provisioning, secrets management, TLS, DNS, and live AWS deployment.
