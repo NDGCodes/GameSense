@@ -74,18 +74,18 @@ def recommend_for_api(
     return _fixture_recommendations(session, mode=mode, favorite_game=favorite_game, limit=limit)
 
 
-def list_games_for_api(session: Session, *, limit: int = 500, query: str | None = None) -> list[GameOut]:
+def list_games_for_api(session: Session, *, limit: int = 500, offset: int = 0, query: str | None = None) -> list[GameOut]:
     if get_recommender_mode() == "content":
         bundle = _load_configured_bundle()
         if bundle is not None:
-            return _list_bundle_games(bundle, limit=limit, query=query)
+            return _list_bundle_games(bundle, limit=limit, offset=offset, query=query)
         games = _load_content_games()
-        return [_to_content_catalog_game_out(game) for game in _filter_catalog_games(games, limit=limit, query=query)]
+        return [_to_content_catalog_game_out(game) for game in _filter_catalog_games(games, limit=limit, offset=offset, query=query)]
     rows = [to_game_out(game) for game in list_active_games(session)]
     if query:
         normalized = query.strip().lower()
         rows = [game for game in rows if normalized in game.title.lower() or normalized in game.slug.lower()]
-    return rows[:limit]
+    return rows[offset:offset + limit]
 
 
 def active_catalog_count_for_api(session: Session) -> int:
@@ -247,7 +247,7 @@ def _bundle_recommendations(
     )
 
 
-def _filter_catalog_games(games: list[CatalogGameSchema], *, limit: int, query: str | None) -> list[CatalogGameSchema]:
+def _filter_catalog_games(games: list[CatalogGameSchema], *, limit: int, offset: int = 0, query: str | None) -> list[CatalogGameSchema]:
     active = [game for game in games if game.isActive]
     if query:
         normalized = query.strip().lower()
@@ -260,11 +260,11 @@ def _filter_catalog_games(games: list[CatalogGameSchema], *, limit: int, query: 
             or any(normalized in term.lower() for term in [*game.genres, *game.tags])
         ]
     active.sort(key=lambda game: (game.title.lower(), game.slug))
-    return active[: max(0, limit)]
+    return active[offset:offset + max(0, limit)]
 
 
-def _list_bundle_games(bundle: LoadedContentBundle, *, limit: int, query: str | None) -> list[GameOut]:
-    return [_to_bundle_catalog_game_out(bundle, game) for game in _filter_catalog_games(bundle.catalog, limit=limit, query=query)]
+def _list_bundle_games(bundle: LoadedContentBundle, *, limit: int, offset: int = 0, query: str | None) -> list[GameOut]:
+    return [_to_bundle_catalog_game_out(bundle, game) for game in _filter_catalog_games(bundle.catalog, limit=limit, offset=offset, query=query)]
 
 
 def _resolve_seed_slug(games: list[CatalogGameSchema], favorite_game: str | None) -> str | None:
