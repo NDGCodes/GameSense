@@ -10,7 +10,7 @@ frontend:
   replicaCount: 2
   image:
     repository: ndgcodes/gamesense-frontend
-    tag: e3f4b2c
+    tag: dd18d76
   resources:
     requests: {cpu: 50m, memory: 64Mi}
     limits: {memory: 128Mi}
@@ -19,7 +19,7 @@ backend:
   replicaCount: 2
   image:
     repository: ndgcodes/gamesense-backend
-    tag: e3f4b2c
+    tag: dd18d76
   recommender:
     mode: content
     contentBundle:
