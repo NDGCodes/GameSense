@@ -8,7 +8,7 @@ frontend:
   replicaCount: 2
   image:
     repository: ndgcodes/gamesense-frontend
-    tag: dff325f
+    tag: b449401
     pullPolicy: IfNotPresent
   service:
     type: ClusterIP
@@ -19,7 +19,7 @@ backend:
   replicaCount: 2
   image:
     repository: ndgcodes/gamesense-backend
-    tag: dff325f
+    tag: b449401
     pullPolicy: IfNotPresent
   env:
     GAMESENSE_ENV: kubernetes
@@ -41,9 +41,9 @@ backend:
         create: true
         name: ""
   database:
-    # Optional: create a Kubernetes Secret separately and set its name here.
+    # Create this Kubernetes Secret separately for the shared database.
     # The secret value should be a SQLAlchemy DATABASE_URL such as postgresql+pg8000://...
-    urlSecretName: ""
+    urlSecretName: gamesense-database
     urlSecretKey: DATABASE_URL
   service:
     type: ClusterIP

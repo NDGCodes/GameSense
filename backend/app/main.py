@@ -4,6 +4,7 @@ from time import perf_counter
 from fastapi import Depends, FastAPI, HTTPException, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from prometheus_client import CONTENT_TYPE_LATEST, Counter, Gauge, Histogram, generate_latest
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 from sqlalchemy import select
 
@@ -129,8 +130,13 @@ def save_game(slug: str, session: Session = Depends(get_session)) -> SavedGameOu
     if row is None:
         row = SavedGame(slug=slug)
         session.add(row)
-    session.commit()
-    return SavedGameOut(slug=row.slug)
+    try:
+        session.commit()
+    except IntegrityError:
+        session.rollback()
+        if session.get(SavedGame, slug) is None:
+            raise
+    return SavedGameOut(slug=slug)
 
 
 @app.delete("/api/saved-games/{slug}", status_code=204)

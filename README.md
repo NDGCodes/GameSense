@@ -119,9 +119,9 @@ These dashboards are local development assets only; this repository state does n
 
 - Docker Compose uses local Postgres credentials only for the disposable development stack.
 - The backend reads `DATABASE_URL` when provided and otherwise falls back to local SQLite for quick manual runs.
-- The Helm chart can consume a Kubernetes Secret containing `DATABASE_URL` via `backend.database.urlSecretName`; without one, the container falls back to ephemeral SQLite for demo rendering.
+- The Helm chart defaults to the separately managed `gamesense-database` Secret, whose `DATABASE_URL` key must point to shared PostgreSQL. Override its name with `backend.database.urlSecretName`. Multiple backend replicas require a secret reference; single-replica demos can explicitly clear it to use ephemeral SQLite.
 - The frontend Nginx image proxies API calls through `BACKEND_UPSTREAM`; Compose defaults it to `backend:8000`, and the Helm chart sets it to the rendered backend Service name.
-- Chart defaults point at the expected GHCR image names; use `helm/values-local.yaml` for local clusters with preloaded images.
+- Chart defaults select revision `b449401`, which includes the port-8080 frontend and non-root runtimes. Images must be built from that revision and published separately before deployment. For preloaded local images, use `helm/values-local.yaml` with `gamesense-frontend:b449401` and `gamesense-backend:b449401`; when building another revision, override both image tags with its Git SHA.
 - CI publishes images to GHCR only on pushes to `main`; pull requests build and scan images locally without pushing.
 - Argo CD points at this repository's `main` branch and the Helm chart path. Confirm image visibility/auth, DNS, TLS, and database secret values during a real deployment.
 

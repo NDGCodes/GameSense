@@ -1,4 +1,6 @@
 import json
+from concurrent.futures import ThreadPoolExecutor
+from threading import Barrier
 from pathlib import Path
 import sys
 
@@ -6,13 +8,14 @@ from alembic import command
 from alembic.config import Config
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, text
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import Session, sessionmaker
 
 BACKEND_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(BACKEND_ROOT))
 
 from app.db import get_session  # noqa: E402
 from app.main import app  # noqa: E402
+from app.models import SavedGame  # noqa: E402
 from app.ml_bundle import build_tfidf_content_bundle  # noqa: E402
 from app.ml_pipeline import normalize_steam_store_games  # noqa: E402
 from app.recommender_service import clear_content_bundle_cache  # noqa: E402
@@ -236,3 +239,37 @@ def test_saved_games_preserve_existing_database_data(tmp_path: Path, monkeypatch
         assert connection.execute(
             text("SELECT note FROM saved_games WHERE slug = :slug"), {"slug": slugs[0]}
         ).scalar_one() == "Existing user data"
+
+
+def test_concurrent_saved_game_puts_keep_one_row(tmp_path: Path, monkeypatch) -> None:
+    monkeypatch.setenv("RECOMMENDER_MODE", "fixture")
+    client = build_test_client(tmp_path)
+    slug = client.get("/api/games?limit=1").json()[0]["slug"]
+    engine = create_engine(
+        f"sqlite:///{tmp_path / 'gamesense-test.db'}",
+        connect_args={"check_same_thread": False},
+    )
+    barrier = Barrier(2)
+
+    class ConcurrentSession(Session):
+        def get(self, entity, ident, **kwargs):
+            row = super().get(entity, ident, **kwargs)
+            if entity is SavedGame and row is None:
+                barrier.wait(timeout=10)
+            return row
+
+    def concurrent_session():
+        with ConcurrentSession(engine) as session:
+            yield session
+
+    original_override = app.dependency_overrides[get_session]
+    app.dependency_overrides[get_session] = concurrent_session
+    try:
+        with ThreadPoolExecutor(max_workers=2) as executor:
+            responses = list(executor.map(lambda _: client.put(f"/api/saved-games/{slug}"), range(2)))
+        assert [response.status_code for response in responses] == [200, 200]
+        assert all(response.json() == {"slug": slug} for response in responses)
+        assert client.get("/api/saved-games").json() == [{"slug": slug}]
+    finally:
+        app.dependency_overrides[get_session] = original_override
+        engine.dispose()

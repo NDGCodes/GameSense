@@ -4,13 +4,13 @@ imageRegistry: ""
 frontend:
   image:
     repository: gamesense-frontend
-    tag: local
+    tag: b449401
     pullPolicy: IfNotPresent
 
 backend:
   image:
     repository: gamesense-backend
-    tag: local
+    tag: b449401
     pullPolicy: IfNotPresent
 
 ingress:
