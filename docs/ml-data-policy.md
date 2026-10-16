@@ -1,6 +1,6 @@
 # ML and data policy
 
-This document records the Milestone 0 source safeguards. Since then, the selected Kaggle source received a narrowly approved local notebook/app-demo scope and a private 27,075-game TF-IDF/tag bundle was fitted and served locally; see the [source manifest](../data/source-manifests/kaggle.steam-store-games-clean.json) and [current evidence](current-evidence.md). This Milestone 0 policy does not authorize dataset acquisition or model training by itself; the later source-specific acceptance is limited to its recorded scope and grants no broader redistribution, production serving, or artifact publication rights. Possible future signals include dense description embeddings.
+This document records the Milestone 0 source safeguards. Since then, the selected Kaggle source received a narrowly approved local notebook/app-demo scope as recorded in the [source manifest](../data/source-manifests/kaggle.steam-store-games-clean.json) and [current evidence](current-evidence.md). This Milestone 0 policy does not authorize dataset acquisition or model training by itself; the later source-specific acceptance is limited to its recorded scope and grants no broader redistribution, production serving, or artifact publication rights. Possible future signals include dense description embeddings.
 
 ## Scope and data gates
 

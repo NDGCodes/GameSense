@@ -13,21 +13,19 @@ Use this file while preparing the final submission. The [current evidence index]
   - `curl http://localhost:8000/ready`
   - `curl -X POST http://localhost:8000/api/recommendations -H 'content-type: application/json' -d '{"mode":"cozy","favorite_game":"Cozy Comet Cafe"}'`
   - Confirm this default response identifies demo fixtures. For real-catalog recommendations, follow the [bundle handoff](../docs/kaggle-steam-store-bundle.md) with the private zip and `RECOMMENDER_MODE=content`.
-- Current UI: browse/search the paged catalog at http://localhost:5173, select a game, and inspect its detail and similar-game cards. Genre filters apply to the loaded page. Saved-game GET/PUT/DELETE is an API capability, not a visible UI control. Artwork is best effort; a blank-looking catalog card in a capture is not proof of a decoded image.
+- Current UI: browse/search the paged catalog at http://localhost:5173, select a game, and inspect its detail and similar-game cards. Genre filters apply to all loaded games. Saved-game GET/PUT/DELETE is an API capability, not a visible UI control. Artwork is best effort; a blank-looking catalog card in a capture is not proof of a decoded image.
 - Local observability smoke checks after Compose starts:
   - Prometheus at http://localhost:9090 can scrape `gamesense-backend-local`.
   - Grafana at http://localhost:3000 loads the GameSense dashboard from provisioning.
 - Helm static validation: run `helm lint helm`, `helm template gamesense helm`, and `helm template gamesense-content helm --set backend.recommender.mode=content`.
   - The default rendered chart keeps `RECOMMENDER_MODE=fixture`.
   - The content render sets `RECOMMENDER_MODE=content`, sets `CONTENT_FIXTURE_PATH=/app/data/fixtures/ml/sample_games.self-authored.json`, and mounts only the committed self-authored sample fixture from the chart artifact ConfigMap. The ConfigMap is annotated with the fixture path and SHA-256 checksum for review, but the backend does not enforce checksum verification at runtime.
-- The approved private Kaggle notebook already completed. Its 27,075-game TF-IDF/tag bundle was loaded in a local app and verified through API and browser flows; follow the [handoff guide](../docs/kaggle-steam-store-bundle.md) for setup and limitations. The bundle is not committed or deployed to AWS.
+- For the completed private Kaggle run and local API/browser results, see the [current evidence index](../docs/current-evidence.md); for repeat setup and limitations, follow the [handoff guide](../docs/kaggle-steam-store-bundle.md).
 - Terraform static validation: run `terraform -chdir=terraform fmt -check -recursive`, `terraform -chdir=terraform init -backend=false`, and `terraform -chdir=terraform validate`.
 
 ## Evidence already observed on current main
 
-- The private grading audit recorded `pytest -v backend/tests`: 58 passed, 1 skipped, 1 warning; a real-bundle Compose stack with PostgreSQL ready and 27,075 catalog items; non-root backend/frontend runtime users; and saved-game PUT/GET/DELETE.
-- Two [selected private browser PNGs](../docs/current-evidence.md#selected-application-screenshots) show the catalog/library at verified `http://localhost:3000/` (task-only Compose override) and selected-game recommendations at verified `http://127.0.0.1:25184/`. The normal committed mapping remains frontend 5173 and Grafana 3000. Neither page capture displays browser chrome or the address bar; supporting Compose/session/health records establish the observed URLs. Five other originals remain backups.
-- [Current-main Actions run 38832359777](https://github.com/NDGCodes/GameSense/actions/runs/38832359777) succeeded. Tests, frontend build, both HIGH/CRITICAL Trivy image gates, and both SHA-tagged GHCR publish jobs passed according to logs. GHCR package-page visibility is still unverified.
+Use the [current evidence index](../docs/current-evidence.md) for recorded test/API/runtime results, the selected application PNGs and supporting localhost records, and the observed Actions/Trivy/GHCR results. It owns capture filenames and URLs, private artifact locations, and evidence limitations.
 
 ## Evidence that still requires capture or external setup
 

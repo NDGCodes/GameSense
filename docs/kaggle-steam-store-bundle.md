@@ -4,7 +4,7 @@ The [source manifest](../data/source-manifests/kaggle.steam-store-games-clean.js
 
 The notebook fits sparse TF-IDF vocabulary/IDF/item vectors plus tag/genre metadata from the attached snapshot. This is fitted feature data, not neural fine-tuning or model training from user behavior.
 
-The approved private CPU notebook completed in October 2026, and the returned bundle was validated and served locally. It contains 27,075 games and 12,000 vocabulary terms, with algorithm `tfidf-tag-content-baseline`, model version `gamesense-steam-store-tfidf-tag-v1`, and snapshot label `kaggle.steam-store-games-clean-local-snapshot`. Those labels are baseline names; use the returned zip hash in the [current evidence index](current-evidence.md) to identify the exact run. The zip and run report remain private, outside git. The steps below are for repeating that workflow with authorized access.
+The [current evidence index](current-evidence.md) records the completed private Kaggle run, returned bundle identity, and local verification. The zip and run report remain private, outside git. The steps below are for repeating that workflow with authorized access.
 
 ## User steps
 
@@ -36,13 +36,13 @@ CI validation uses self-authored samples for the normalizer, bundle round trip, 
 
 ### Verified catalog artwork
 
-The local audit completed on 2026-10-15 UTC against the returned bundle with SHA-256 `31dc610321a5b34aab0b08a918381396e445cd52211ae2389a35fbd293ef11a6`. Its 27,075 games have 27,075 unique Steam IDs and slugs, including 41 duplicate-title groups. None of these legacy bundle records contains `metadata.imageUrl`; the identity-based mapping supplies artwork without rebuilding the bundle.
+The local artwork audit completed on 2026-10-15 UTC against the returned bundle identified in the [current evidence index](current-evidence.md). Its 27,075 games have 27,075 unique Steam IDs and slugs, including 41 duplicate-title groups. None of these legacy bundle records contains `metadata.imageUrl`; the identity-based mapping supplies artwork without rebuilding the bundle.
 
 An HTTP HEAD census of every exact-ID header URL found 27,074 HTTP 200 `image/jpeg` responses and one HTTP 404. The affected game's same-ID `capsule_231x87.jpg` returned HTTP 200 and decoded successfully through the actual frontend component. Thus all 27,075 games had at least one advertised image asset at audit time. Representative real covers were decoded in the browser; the census did not download or decode all image bodies. Eleven transient connection failures recovered on retry. Availability can change, so bounded fallback and accessible placeholders remain necessary.
 
 Local verification also exercised the real catalog service for every game, sampled public API queries across duplicate titles, non-ASCII titles and catalog boundaries, and checked all recommendation modes. Browser checks covered desktop/mobile layout and the actual missing-header case. A fresh app load requested 500 catalog options and zero Steam images before recommendations, keeping the full-catalog census out of the rendering path. The bundle, per-ID probe results and screenshots remain outside git; no additional artwork provider or redistribution permission was introduced.
 
-That 2026-10-15 browser-load observation predates the current paged catalog UI. The later [current-main captures](current-evidence.md#selected-application-screenshots) show catalog and Similar results; the catalog includes blank-looking cards and does not establish that every visible image decoded. Five other desktop/mobile originals remain private backups.
+That 2026-10-15 browser-load observation predates the current paged catalog UI. See the [current evidence index](current-evidence.md#selected-application-screenshots) for later captures, their selection, and image-decoding limitations.
 
 ### Repeat the local artwork checks
 

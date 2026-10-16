@@ -1,6 +1,6 @@
 # GameSense
 
-GameSense is a Steam-style game discovery app with a local catalog and similar-game flow. The repository includes database migrations, tests, containers, CI, static Terraform and Kubernetes/Helm definitions, and local monitoring assets. A private Kaggle run fitted a TF-IDF/tag baseline from a historical Steam Store Games snapshot; the returned bundle was loaded and exercised locally with 27,075 games. The repository does not contain a live AWS or Kubernetes deployment.
+GameSense is a Steam-style game discovery app with a local catalog and similar-game flow. The repository includes database migrations, tests, containers, CI, static Terraform and Kubernetes/Helm definitions, and local monitoring assets. A private Kaggle run fitted a TF-IDF/tag baseline from a historical Steam Store Games snapshot; the returned bundle was loaded and exercised locally (see the [current evidence index](docs/current-evidence.md)). The repository does not contain a live AWS or Kubernetes deployment.
 
 The repository does **not** commit raw Steam/Kaggle data, generated recommendation bundles, fine-tuned models, live Steam trend signals, or unrestricted redistribution claims. Fixture mode still uses a tiny hand-written demo catalog so local and CI flows are testable without downloading or misrepresenting a real Steam dataset. Content mode can load a returned local Kaggle bundle from an ignored path when the user supplies it.
 
@@ -95,7 +95,7 @@ The [M8 final local evidence freeze and claim audit](docs/m8-final-local-evidenc
 
 ## Kaggle content-bundle handoff
 
-See [Kaggle Steam Store bundle handoff](docs/kaggle-steam-store-bundle.md) for notebook setup, the verified private run, local backend startup, and recommendation limitations. The [source manifest](data/source-manifests/kaggle.steam-store-games-clean.json) records the selected source’s provenance, attribution, and accepted usage scope. The fitted bundle reports algorithm `tfidf-tag-content-baseline`, model version `gamesense-steam-store-tfidf-tag-v1`, and snapshot label `kaggle.steam-store-games-clean-local-snapshot`; these labels do not identify the exact zip by content hash. The bundle remains private and is not a tuned accuracy or personalization result.
+See [Kaggle Steam Store bundle handoff](docs/kaggle-steam-store-bundle.md) for notebook setup, the verified private run, local backend startup, and recommendation limitations. The [source manifest](data/source-manifests/kaggle.steam-store-games-clean.json) records the selected source’s provenance, attribution, and accepted usage scope. The [current evidence index](docs/current-evidence.md) owns the private run’s bundle identity and verification results. The bundle is not a tuned accuracy or personalization result.
 
 ## Demo fixture catalog
 
@@ -141,7 +141,7 @@ Implemented in this slice:
 - [x] Kaggle notebook handoff and local content-bundle loader for the selected Steam Store Games source, with attribution and uncertainty disclosures.
 - [x] Responsive recommendation cover cards with identity-bound Steam headers, same-game capsule fallback, and missing-artwork placeholders for the local demo.
 - [x] Returned real bundle imported and catalog artwork checked locally; see [coverage evidence and repeatable checks](docs/kaggle-steam-store-bundle.md#verified-catalog-artwork).
-- [x] Current desktop/mobile catalog → detail → similar-recommendation flow observed with the private 27,075-game bundle; see the [evidence index](docs/current-evidence.md).
+- [x] Current desktop/mobile catalog → detail → similar-recommendation flow observed with the private bundle; see the [evidence index](docs/current-evidence.md).
 
 Deferred until the later authorized phases:
 
