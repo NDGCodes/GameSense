@@ -39,14 +39,13 @@ def test_self_authored_fixture_is_tiny_and_identified() -> None:
     assert all(record["genres"] and record["tags"] for record in fixture["records"])
 
 
-def test_ml_policy_mentions_hybrid_architecture_without_implementation() -> None:
-    policy = (REPO_ROOT / "docs/ml-data-policy.md").read_text(encoding="utf-8")
+def test_readme_documents_data_policy_and_attribution() -> None:
+    readme = (REPO_ROOT / "README.md").read_text(encoding="utf-8")
+    manifest = load_json("data/source-manifests/kaggle.steam-store-games-clean.json")
 
-    assert "dense description embeddings" in policy
-    assert "sparse TF-IDF" in policy
-    assert "exact tag/genre" in policy
-    assert "does not authorize dataset acquisition" in policy
-    assert "does not authorize" in policy and "model training" in policy
+    assert manifest["attribution"]["text"] in readme
+    assert "never committed" in readme
+    assert "sparse TF-IDF" in readme
 
 
 def test_gitignore_blocks_real_data_and_model_artifacts_but_not_fixtures() -> None:

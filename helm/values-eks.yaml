@@ -1,7 +1,7 @@
 # EKS capstone overlay, layered on values.yaml by Argo CD (deploy/gitops).
 # CI rewrites both image tags to the published commit SHA on every push to main.
 # Cluster prerequisites created outside Git: the ghcr-pull and gamesense-database
-# Secrets, and the gamesense-content-bundle ConfigMap (see docs/capstone-cloud-runbook.md).
+# Secrets, and the gamesense-content-bundle ConfigMap (see "Kubernetes deployment" in README.md).
 imageRegistry: ghcr.io
 imagePullSecrets:
   - name: ghcr-pull
