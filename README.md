@@ -10,7 +10,7 @@ Everything for review lives in [`demo/`](demo/):
 
 | Item | File |
 |---|---|
-| Presentation deck (36 slides) | [`demo/GameSense-Capstone.pptx`](demo/GameSense-Capstone.pptx) · [PDF](demo/GameSense-Capstone.pdf) |
+| Presentation deck (36 slides) | [`demo/presentation.pptx`](demo/presentation.pptx) · [PDF](demo/slides.pdf) |
 | Project video: slides, then a live walkthrough | [`demo/CapstoneProject_Video.mp4`](demo/CapstoneProject_Video.mp4) |
 | Evidence screenshots | [`demo/screenshots/`](demo/screenshots/) |
 
