@@ -11,7 +11,7 @@ Everything for review lives in [`demo/`](demo/):
 | Item | File |
 |---|---|
 | Presentation deck (36 slides) | [`demo/GameSense-Capstone.pptx`](demo/GameSense-Capstone.pptx) · [PDF](demo/GameSense-Capstone.pdf) |
-| Presentation video (12.5 min): slides, then a live walkthrough | [`demo/Capstone_Video.mp4`](demo/Capstone_Video.mp4) |
+| Presentation video: slides, then a live walkthrough | [`demo/CapstoneProject_Video.mp4`](demo/CapstoneProject_Video.mp4) |
 | Evidence screenshots | [`demo/screenshots/`](demo/screenshots/) |
 
 | Module | Evidence |
@@ -26,7 +26,7 @@ Everything for review lives in [`demo/`](demo/):
 | M8 Kubernetes | [pods](demo/screenshots/M8-eks-pods.png) · [services](demo/screenshots/M8-eks-svc.png) · [helm list + Ingress](demo/screenshots/M8-eks-helm.png) · [app via Ingress](demo/screenshots/M8-eks-app-ingress.png) · [Argo CD synced](demo/screenshots/M8-argocd-synced.png) |
 | M9 Observability | [/metrics](demo/screenshots/M9-eks-metrics.png) · [Prometheus targets UP](demo/screenshots/M9-eks-prometheus-up.png) · [Grafana dashboard](demo/screenshots/M9-eks-grafana.png) |
 
-The AWS account ID and the author's email are blurred in the console and Argo CD screenshots.
+The AWS console screenshots show the `Nishant_Aws` account name while blurring the account number, including its appearances in ARNs. The author's email remains blurred in the Argo CD screenshot.
 
 ## Architecture
 
@@ -298,3 +298,5 @@ helm uninstall gamesense-monitoring -n gamesense
 helm uninstall gamesense-ingress -n gamesense-ingress              # wait until its AWS load balancer is gone
 terraform -chdir=terraform destroy
 ```
+
+[Terraform destroy completion screenshot — 60 resources destroyed](demo/screenshots/M10-terraform-destroy.png).
