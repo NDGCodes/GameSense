@@ -26,7 +26,7 @@ Everything for review lives in [`demo/`](demo/):
 | M8 Kubernetes | [pods](demo/screenshots/M8-eks-pods.png) · [services](demo/screenshots/M8-eks-svc.png) · [helm list + Ingress](demo/screenshots/M8-eks-helm.png) · [app via Ingress](demo/screenshots/M8-eks-app-ingress.png) · [Argo CD synced](demo/screenshots/M8-argocd-synced.png) |
 | M9 Observability | [/metrics](demo/screenshots/M9-eks-metrics.png) · [Prometheus targets UP](demo/screenshots/M9-eks-prometheus-up.png) · [Grafana dashboard](demo/screenshots/M9-eks-grafana.png) |
 
-The original AWS console screenshots show the `Nishant_Aws` account name. The author's email remains blurred in the Argo CD screenshot.
+The AWS console screenshots show the `Nishant_Aws` account name while blurring the account number, including its appearances in ARNs. The author's email remains blurred in the Argo CD screenshot.
 
 ## Architecture
 
