@@ -31,7 +31,7 @@ python -m app.ml_pipeline manifest \
 ## Scope and license gate
 
 - `source-check` rejects unapproved manifests, checksum mismatches, license uncertainties, disallowed local/CI/repository use, and any non-self-authored source for this milestone.
-- Future external sources still require their own approved manifest before any ingestion or training.
+- Other external sources still require their own approved manifest before any ingestion or training. The selected Kaggle source has its own narrowly approved manifest and private local run; see [current evidence](current-evidence.md).
 - `normalize` accepts only `data/fixtures/ml/sample_games.self-authored.json`-style tiny self-authored fixture records and maps them into `CatalogGameSchema` records.
 - `validate` reports catalog schema errors, source mismatches, duplicate identifiers, and missing genre/tag signals.
 - `manifest` records deterministic row counts, validation findings, and checksums for local evidence.

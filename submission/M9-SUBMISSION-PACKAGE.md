@@ -1,51 +1,19 @@
-# M9 Submission Package: Local Evidence Walkthrough
+# M9 submission package: current local evidence
 
-This package is a reviewer-facing script and evidence index for the local scope completed after M8. It is intentionally limited to evidence that is already committed or captured locally. It does **not** claim real Steam/Kaggle data acquisition, Kaggle model training, generated trained model artifacts, AWS provisioning, Kubernetes deployment, or production monitoring.
+This is a reviewer-facing walkthrough and evidence index for the current GameSense repository. The dated [M8 freeze](../docs/m8-final-local-evidence.md) remains a record of fixture-only checks on an earlier checkout. A later private Kaggle run and current-main local app audit supersede its fixture-only description of the **current** project. See the [current evidence index](../docs/current-evidence.md) for the actual captures and gaps. Private task files named there are local evidence, not links a grader can open from this repository.
 
-Final submission narrative framing is still a captain decision. Use this package as the factual local evidence base and do not expand it into claims about phases that have not run yet.
+## Suggested walkthrough
 
-## One-minute summary
+1. **Scope and source.** Show the [README](../README.md), [source manifest](../data/source-manifests/kaggle.steam-store-games-clean.json), and [Kaggle handoff](../docs/kaggle-steam-store-bundle.md). The approved private Kaggle notebook fitted a sparse TF-IDF/tag baseline from the historical Steam Store Games snapshot and returned a private 27,075-game bundle. Its algorithm is `tfidf-tag-content-baseline`, model version `gamesense-steam-store-tfidf-tag-v1`, and snapshot label `kaggle.steam-store-games-clean-local-snapshot`. The bundle has stable Steam ID based slugs and was loaded locally. These labels are not exact-run hashes; the private bundle SHA-256 and source hashes identify the observed run. Attribute Nik Davis's Kaggle dataset and disclose unresolved Steam/SteamSpy upstream terms. This local acceptance is not redistribution clearance.
+2. **Application.** Show `frontend/`, `backend/`, `backend/alembic/versions/`, and `docker-compose.yml`. The current React UI has a paged, searchable catalog and a selected-game detail screen. Selecting a game requests similar games by stable slug and excludes the seed. Use the [selected two captures](../docs/current-evidence.md#selected-application-screenshots) for catalog/library and selected-game recommendations. Some catalog cards look blank; the captures do not prove all remote images decoded. The artwork component tries same-ID assets and shows a title placeholder if candidates fail. The UI does not offer saved-game controls, though the API implements GET, PUT, and DELETE for a shared PostgreSQL list.
+3. **Local verification.** Point to the [current evidence index](../docs/current-evidence.md): the isolated Compose run reported PostgreSQL ready and 27,075 catalog items; `pytest -v backend/tests` returned 58 passed, 1 skipped, 1 warning; both built images ran as non-root users; saved-game PUT/GET/DELETE and browser catalog/recommendation calls worked. Fixture mode and the committed self-authored sample still support reproducible local/CI smoke checks when the private bundle is unavailable. Do not present the fixture response as the real-bundle response.
+4. **CI and security.** Show `.github/workflows/ci.yml` and [the observed successful main run](https://github.com/NDGCodes/GameSense/actions/runs/38832359777). It ran tests and frontend build, scanned both images with the HIGH/CRITICAL failure gate, then logged GHCR pushes tagged `ff4734a`. This supports a successful publish operation in that run. GHCR package-page visibility to a grader is unverified; its screenshot is absent. The configured scan found zero matching issues in those image builds under `ignore-unfixed`, not a universal vulnerability-free result.
+5. **Infrastructure boundary.** Show `terraform/`, `k8s/namespace.yaml`, `helm/`, `deploy/gitops/`, and `monitoring/`. Terraform fmt/init/validate and Helm lint/render passed locally. Helm renders two configured replicas each, ClusterIP services, and Ingress paths `/api` to backend and `/` to frontend. These are definitions and static checks. No AWS-backed plan, EKS installation, live pods/ingress, destroy, cluster monitoring, or final commit-to-deployment demonstration is evidenced.
 
-This M9 evidence package demonstrates a local app and infrastructure foundation for a Steam-style recommendation project. The repository contains a FastAPI backend, React/Vite frontend, database migrations, Docker Compose stack, Prometheus/Grafana local observability, GitHub Actions workflow, Terraform AWS/EKS foundation, Helm chart, Argo CD manifest, and a local baseline recommender/evaluation path whose recorded evidence uses a tiny self-authored fixture catalog. See the [README](../README.md) for current product capabilities.
-
-The local evidence freeze from M8 shows backend tests, frontend build, Compose config/content-smoke, Helm lint/render, and Terraform static validation. The fixture data is hand-written demo data. No real external dataset has been downloaded or ingested, no Kaggle training has been run, no trained model file has been produced, and no AWS resources have been provisioned for this package.
-
-## Walkthrough / video script
-
-### 0. Opening disclosure (15-20 seconds)
-
-> This walkthrough covers the local GameSense package only. The repository is prepared for later real-data and cloud phases, but this evidence does not include real Steam/Kaggle data acquisition, Kaggle training, a trained model artifact, AWS deployment, or live production monitoring. All local recommendation behavior shown here uses committed self-authored demo fixtures.
-
-### 1. Repository tour (45-60 seconds)
-
-Show these paths in the file tree:
-
-- `frontend/` — React/Vite single-page app for the recommendation UI.
-- `backend/` — FastAPI API, database access, migrations, tests, recommender service, and Prometheus metrics.
-- `data/fixtures/ml/sample_games.self-authored.json` — tiny self-authored local sample catalog.
-- `notebooks/gamesense_baseline_kaggle.ipynb` — notebook workflow described in the [handoff guide](../docs/kaggle-steam-store-bundle.md).
-- `docker-compose.yml` — local Postgres/backend/frontend/Prometheus/Grafana stack.
-- `terraform/` — AWS VPC/EKS infrastructure foundation for later authorized cloud work.
-- `helm/` and `deploy/gitops/` — Helm and Argo CD deployment manifests.
-- `monitoring/` — local Prometheus and Grafana provisioning.
-- `docs/m8-final-local-evidence.md` — local evidence ledger and claim audit.
-- `submission/` — walkthrough/checklist material for reviewers.
-
-Narration:
-
-> The repo is organized around proving the local app and deployment surfaces before claiming real-data ML or cloud deployment. The README and evidence ledger explicitly separate implemented local scope from deferred real-data, model, and AWS work.
-
-### 2. Local app and recommender scope (60-75 seconds)
-
-Show `README.md`, `backend/app/recommender_service.py`, `backend/tests/`, and the demo fixture.
-
-Narration:
-
-> The backend exposes health/readiness, recommendation, and metrics endpoints. The recommender path can run with database demo fixtures or the content fixture mode. The data in this branch is intentionally tiny and self-authored, which makes local tests reproducible without downloading or redistributing a third-party game catalog. The local baseline recommender and offline evaluation are documented as smoke evidence, not as proof of real-catalog model quality.
-
-Suggested local API example if a reviewer starts Compose later:
+For a fixture-only API smoke check with the default Compose stack, use:
 
 ```bash
+docker compose up --build
 curl http://localhost:8000/health
 curl http://localhost:8000/ready
 curl -X POST http://localhost:8000/api/recommendations \
@@ -53,91 +21,12 @@ curl -X POST http://localhost:8000/api/recommendations \
   -d '{"mode":"cozy","favorite_game":"Cozy Comet Cafe"}'
 ```
 
-Expected disclosure while showing the response:
+The committed Compose mapping serves the frontend at `http://localhost:5173` and Grafana at `http://localhost:3000`. The private audit used a task-only override to capture the app at port 3000. To show real-catalog recommendations, follow the [bundle handoff](../docs/kaggle-steam-store-bundle.md) with the private zip and `RECOMMENDER_MODE=content`; do not claim the default Compose request above uses that bundle.
 
-> The response identifies demo/fixture-backed recommendations. It should not be described as Steam production data or trained ML output.
+## Evidence to supply and outstanding criteria
 
-### 3. M8 evidence freeze (75-90 seconds)
+Select at most two application browser PNGs for the submission: `gamesense-grading-evidence/screenshots/2026-10-16-main-localhost-3000-application.png` for the catalog at verified `http://localhost:3000/`, and `gamesense-grading-evidence/screenshots/2026-10-16-main-desktop-recommendations.png` for the selected-game result at verified `http://127.0.0.1:25184/`. The other five originals stay private as backups. The PNGs crop browser chrome, so neither shows the URL in the address bar; the [evidence index](../docs/current-evidence.md#selected-application-screenshots) names the supporting session/Compose/health records and the window-capture limit. They are not committed or automatically attached to a submission. The same private task holds original pytest, Compose, CI, Trivy, Terraform, and Helm output files.
 
-Open `docs/m8-final-local-evidence.md` and show the evidence table.
+Genuine terminal screenshots of pytest and Compose startup, GitHub history/green-run/Trivy screenshots, and GHCR package-page screenshots remain uncaptured or access-blocked. The repository is private and evaluator access is unverified. Live AWS/EKS, Kubernetes/Ingress, cluster observability, and a final deployed-update demo remain deferred. [M10](M10-WALKTHROUGH.md) tracks the remaining presentation proof. No recording or completed slide deck is claimed here.
 
-Narration:
-
-> M8 froze the local evidence. Use the ledger's evidence table to show the recorded commands and results, then its claim audit to explain what those checks support. Keep local/static evidence separate from the deferred real-data, training, and cloud phases.
-
-Evidence to point at:
-
-- [Evidence bundle](../docs/m8-final-local-evidence.md#evidence-bundle) — authoritative artifact location, tool versions, raw artifact names, commands, and results.
-- [Supported local Python evidence](../docs/m8-final-local-evidence.md#supported-local-python-evidence) — interpreter coverage and its limits.
-- [Claim ledger](../docs/m8-final-local-evidence.md#claim-ledger) — supported claims and explicit non-claims.
-
-### 4. Infrastructure and observability readiness, not deployment (45-60 seconds)
-
-Show `terraform/`, `helm/`, `deploy/gitops/argocd-application.yaml`, and `monitoring/`.
-
-Narration:
-
-> The repository includes infrastructure and deployment manifests so the next authorized phase can move to AWS and Kubernetes. The current package only supports static/local claims: Terraform formatted/initialized/validated without a backend, Helm linted and rendered, and local Compose includes Prometheus and Grafana provisioning. It does not claim an applied AWS stack, a live EKS cluster, synced Argo CD app, public ingress, DNS/TLS, or live monitoring.
-
-### 5. Kaggle and real-data handoff (30-45 seconds)
-
-Show the [Kaggle handoff guide](../docs/kaggle-steam-store-bundle.md) for the current notebook and returned-bundle workflow. Keep that workflow separate from the fixture-only M8/M9 evidence; no real-data notebook run or returned artifact is included in this package.
-
-### 6. Closing / next steps (20-30 seconds)
-
-Narration:
-
-> The local scope is packaged for review: app, tests, build, local containers, static IaC, Helm/GitOps manifests, local observability, and fixture-only recommender evidence. Follow the [authoritative Kaggle handoff guide](../docs/kaggle-steam-store-bundle.md) for current returned-bundle and artwork verification status beyond this package; AWS deployment requires separate authorization. The final story and submission narrative scope remain a captain decision.
-
-## Slide outline
-
-1. **Scope and disclosure**
-   - Local/static evidence package after M8.
-   - Real data, Kaggle training, trained model artifact, and AWS deployment are not yet performed.
-
-2. **Architecture surface**
-   - Frontend, backend, database migrations, Compose, CI, Terraform, Helm, GitOps, observability.
-
-3. **Local recommender evidence**
-   - Self-authored fixture catalog.
-   - Baseline recommender/evaluation smoke path.
-   - No real Steam catalog and no trained model claims.
-
-4. **M8 evidence ledger**
-   - Show the [authoritative evidence table](../docs/m8-final-local-evidence.md#evidence-bundle) for backend, frontend, Compose, Helm, and Terraform results.
-   - Use the ledger's recorded counts, versions, and artifact names.
-
-5. **Deployment readiness boundaries**
-   - Manifests and static validation exist.
-   - No AWS plan/apply, EKS, Argo CD sync, public ingress, or live monitoring evidence yet.
-
-6. **Next-phase handoff**
-   - Follow the [Kaggle handoff guide](../docs/kaggle-steam-store-bundle.md).
-   - Proceed to authorized AWS deployment.
-   - Captain decides final submission narrative scope.
-
-## Reviewer evidence index
-
-| Review question | Where to inspect | Supported claim |
-| --- | --- | --- |
-| What is the app architecture? | `README.md`, repository directories | Local app/infrastructure foundation exists. |
-| What local evidence was captured? | `docs/m8-final-local-evidence.md` | M8 evidence ledger summarizes actual local/static checks and raw artifact names. |
-| Does the backend test locally? | `docs/m8-final-local-evidence.md`, `backend/tests/` | See the [M8 evidence table](../docs/m8-final-local-evidence.md#evidence-bundle) for the recorded test count and interpreter. |
-| Does the frontend build locally? | `docs/m8-final-local-evidence.md`, `frontend/` | See the [M8 evidence table](../docs/m8-final-local-evidence.md#evidence-bundle) for the build result. |
-| Is Compose valid? | `docker-compose.yml`, M8 ledger | See the [M8 evidence table](../docs/m8-final-local-evidence.md#evidence-bundle) for config/content-smoke results and conditions. |
-| Is Helm ready for review? | `helm/`, M8 ledger | See the [M8 evidence table](../docs/m8-final-local-evidence.md#evidence-bundle) for lint/render results. |
-| Is Terraform ready for static review? | `terraform/`, M8 ledger | See the [M8 evidence table](../docs/m8-final-local-evidence.md#evidence-bundle) for static validation results and limits. |
-| What data powers local recommendations? | `data/fixtures/ml/sample_games.self-authored.json`, `README.md`, `docs/ml-data-policy.md` | The M8/M9 evidence uses the self-authored fixture; see the [README](../README.md) for current serving options. |
-| Was real Kaggle/Steam data used? | `docs/m8-final-local-evidence.md`, `docs/ml-data-policy.md` | No real-data run is included in the M8/M9 evidence; see the [handoff guide](../docs/kaggle-steam-store-bundle.md) for the current workflow. |
-| Was a model trained or served? | `README.md`, `docs/ml-baseline-model-card.md`, M8 ledger | No returned artifact is included in this evidence; see the [README](../README.md) for current serving capabilities. |
-| Was AWS deployed? | `submission/M10-WALKTHROUGH.md`, M8 ledger | No. AWS/Kubernetes work remains external setup for later authorization. |
-
-## Explicit non-claims for this package
-
-- No external Steam/Kaggle dataset was downloaded, ingested, redistributed, or used for training.
-- No Kaggle training job was run.
-- No embeddings, generated recommendation dataset, or trained model file is included in the M8/M9 evidence. Current serving capabilities are documented in the [README](../README.md).
-- No Terraform plan/apply was run against AWS.
-- No EKS cluster, Argo CD app, Kubernetes workload, ingress, DNS/TLS, or cloud database was provisioned or verified.
-- No live Prometheus/Grafana production monitoring is claimed.
-- No final submission narrative beyond these factual local claims is selected here; that remains a captain decision.
+The real bundle is a local TF-IDF/tag baseline on a historical snapshot. It does not support claims of tuned accuracy, personalization, live trends, current Steam coverage, neural fine-tuning, unrestricted data or artwork rights, or production deployment.

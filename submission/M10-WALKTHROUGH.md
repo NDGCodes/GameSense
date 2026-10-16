@@ -1,6 +1,6 @@
 # M10 Walkthrough and Evidence Checklist
 
-Use this file while preparing the final submission. Do not mark cloud, cluster, monitoring, or video evidence complete until it has been verified in the target environment. This checklist separates evidence verified from local repository commands from cloud/deployment evidence that has not been performed in this branch.
+Use this file while preparing the final submission. The [current evidence index](../docs/current-evidence.md) records what was actually captured on current main; the [M8 freeze](../docs/m8-final-local-evidence.md) is historical. Choose at most the two selected application images for submission; five other originals remain private backups. The other screenshot and deployed-demo criteria below remain open.
 
 ## Verified local evidence this repository can produce
 
@@ -8,34 +8,41 @@ Use this file while preparing the final submission. Do not mark cloud, cluster, 
 - Backend migration/test path: run `cd backend && python -m venv .venv && source .venv/bin/activate && python -m pip install -r requirements.txt -r requirements-dev.txt && pytest -q`.
 - Frontend build: run `cd frontend && npm ci && npm run build`.
 - Compose config: run `docker compose config --quiet` and, where Docker resources are available, `docker compose up --build`.
-- API smoke checks after Compose starts:
+- Fixture-mode API smoke checks after the default Compose stack starts:
   - `curl http://localhost:8000/health`
   - `curl http://localhost:8000/ready`
   - `curl -X POST http://localhost:8000/api/recommendations -H 'content-type: application/json' -d '{"mode":"cozy","favorite_game":"Cozy Comet Cafe"}'`
-  - Confirm the response says the catalog is demo fixtures, not a real Steam dataset or ML output.
+  - Confirm this default response identifies demo fixtures. For real-catalog recommendations, follow the [bundle handoff](../docs/kaggle-steam-store-bundle.md) with the private zip and `RECOMMENDER_MODE=content`.
+- Current UI: browse/search the paged catalog at http://localhost:5173, select a game, and inspect its detail and similar-game cards. Genre filters apply to the loaded page. Saved-game GET/PUT/DELETE is an API capability, not a visible UI control. Artwork is best effort; a blank-looking catalog card in a capture is not proof of a decoded image.
 - Local observability smoke checks after Compose starts:
   - Prometheus at http://localhost:9090 can scrape `gamesense-backend-local`.
   - Grafana at http://localhost:3000 loads the GameSense dashboard from provisioning.
 - Helm static validation: run `helm lint helm`, `helm template gamesense helm`, and `helm template gamesense-content helm --set backend.recommender.mode=content`.
   - The default rendered chart keeps `RECOMMENDER_MODE=fixture`.
   - The content render sets `RECOMMENDER_MODE=content`, sets `CONTENT_FIXTURE_PATH=/app/data/fixtures/ml/sample_games.self-authored.json`, and mounts only the committed self-authored sample fixture from the chart artifact ConfigMap. The ConfigMap is annotated with the fixture path and SHA-256 checksum for review, but the backend does not enforce checksum verification at runtime.
-- Kaggle notebook and returned-bundle workflow: follow the [authoritative handoff guide](../docs/kaggle-steam-store-bundle.md). This is separate from the fixture-only local evidence below.
+- The approved private Kaggle notebook already completed. Its 27,075-game TF-IDF/tag bundle was loaded in a local app and verified through API and browser flows; follow the [handoff guide](../docs/kaggle-steam-store-bundle.md) for setup and limitations. The bundle is not committed or deployed to AWS.
 - Terraform static validation: run `terraform -chdir=terraform fmt -check -recursive`, `terraform -chdir=terraform init -backend=false`, and `terraform -chdir=terraform validate`.
 
-## Evidence that still requires real external setup and has not been performed here
+## Evidence already observed on current main
 
-- GitHub Actions run on the pushed branch/PR, including backend tests, frontend build, Compose config, Terraform validate, Helm lint/render, Docker image build, and Trivy scan.
-- GHCR image publishing from a push to `main` after review/merge.
+- The private grading audit recorded `pytest -v backend/tests`: 58 passed, 1 skipped, 1 warning; a real-bundle Compose stack with PostgreSQL ready and 27,075 catalog items; non-root backend/frontend runtime users; and saved-game PUT/GET/DELETE.
+- Two [selected private browser PNGs](../docs/current-evidence.md#selected-application-screenshots) show the catalog/library at verified `http://localhost:3000/` (task-only Compose override) and selected-game recommendations at verified `http://127.0.0.1:25184/`. The normal committed mapping remains frontend 5173 and Grafana 3000. Neither page capture displays browser chrome or the address bar; supporting Compose/session/health records establish the observed URLs. Five other originals remain backups.
+- [Current-main Actions run 38832359777](https://github.com/NDGCodes/GameSense/actions/runs/38832359777) succeeded. Tests, frontend build, both HIGH/CRITICAL Trivy image gates, and both SHA-tagged GHCR publish jobs passed according to logs. GHCR package-page visibility is still unverified.
+
+## Evidence that still requires capture or external setup
+
+- Genuine terminal screenshots of the current pytest and Compose startup output; original logs are private but are not screenshots.
+- GitHub commit-history, green-run, and Trivy-output browser screenshots, and both GHCR SHA-tag package-page screenshots. The isolated browser could not access the private repository, and the package-listing API lacked `read:packages`. The repository's evaluator access and submission-form URL also remain unverified.
 - `terraform plan` and `terraform apply` against an authorized AWS account.
 - AWS Console verification of the VPC, public/private subnets, NAT gateway, EKS cluster, and managed node group.
 - `aws eks update-kubeconfig` and `kubectl` access to the created cluster.
 - Argo CD installation, application creation from `deploy/gitops/argocd-application.yaml`, and synced/healthy status.
-- Kubernetes `gamesense` namespace showing healthy deployments, services, pods, and ingress.
+- Kubernetes `gamesense` namespace applied and healthy deployments, services, pods, and ingress. The chart statically configures two replicas for each app, ClusterIP services, and `/api` and `/` Ingress paths; no live cluster proof exists.
 - A configured `DATABASE_URL` Secret or a consciously accepted ephemeral SQLite demo mode for the cluster walkthrough.
 - Prometheus target confirmed `UP` in the deployed environment.
 - Grafana dashboard populated with live request and latency metrics from the deployed backend.
-- User-run Kaggle notebook and returned-bundle verification: follow the [handoff guide](../docs/kaggle-steam-store-bundle.md). No real-data Kaggle run is claimed by this checklist.
-- Submission video/slides that show only evidence actually captured from the environment being claimed.
+- A real commit → pipeline → deployed-update walkthrough or recording; a successful CI run alone does not prove a deployed update.
+- Submission video/slides using only evidence actually captured from the environment being claimed. No completed recording or slide deck is evidenced here.
 
 ## External prerequisites
 
@@ -52,6 +59,6 @@ Use this file while preparing the final submission. Do not mark cloud, cluster, 
 - Accuracy tuning, fine-tuning, and deployment of generated artifacts.
 - Claiming production readiness, live cluster health, or monitoring evidence from local-only validation.
 
-## Milestone 8 local evidence freeze
+## Historical M8 local evidence freeze
 
-Record only commands that were actually run for this branch. See the [M8 evidence ledger](../docs/m8-final-local-evidence.md) for the captured results, interpreter coverage, raw artifact location, and explicit non-claims.
+The [M8 evidence ledger](../docs/m8-final-local-evidence.md) records commands, interpreter coverage, raw artifact names, and non-claims for that earlier fixture-only checkout. Use the [current evidence index](../docs/current-evidence.md) for later Kaggle, current-main app, and CI observations.

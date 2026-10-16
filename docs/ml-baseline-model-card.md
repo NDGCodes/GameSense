@@ -1,5 +1,7 @@
 # GameSense baseline recommender model card
 
+This card describes the Milestone 4 **self-authored fixture evaluation** below. The later approved private Kaggle run fitted and locally served a separate 27,075-game TF-IDF/tag bundle with algorithm `tfidf-tag-content-baseline`, model version `gamesense-steam-store-tfidf-tag-v1`, and snapshot label `kaggle.steam-store-games-clean-local-snapshot`; see the [current evidence index](current-evidence.md) and [source manifest](../data/source-manifests/kaggle.steam-store-games-clean.json). The labels are not exact-run hashes. That local run did not measure tuned accuracy, personalization, live trends, or production quality, and its historical source retains attribution and upstream terms uncertainty.
+
 ## Model/component details
 
 - **Component:** `backend/app/recommender.py`

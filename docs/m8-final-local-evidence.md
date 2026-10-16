@@ -4,7 +4,7 @@ M8 is a local/static evidence freeze. It does not download or ingest real Steam/
 
 ## Evidence bundle
 
-Evidence artifacts were captured outside the worktree under `/Users/nishantdasgupta/Documents/ML_Ops/firstmate/data/gamesense-ml-m8-evidence/` from commit `492d3c6e2d4002e5ef1101e6d68b8310ee9e3ff6`.
+Evidence artifacts were captured outside the worktree in the private `gamesense-ml-m8-evidence/` firstmate task directory from commit `492d3c6e2d4002e5ef1101e6d68b8310ee9e3ff6`.
 
 Commands below record that historical checkout, including its former infrastructure paths. Use the [README validation commands](../README.md#validation-commands) for the current layout and the [local rubric evidence index](local-rubric-evidence.md) for later evidence.
 
