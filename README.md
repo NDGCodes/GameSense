@@ -14,7 +14,7 @@ Everything for review lives in [`demo/`](demo/):
 | Project video: slides, then a live walkthrough | [`demo/CapstoneProject_Video.mp4`](demo/CapstoneProject_Video.mp4) |
 | Evidence screenshots | [`demo/screenshots/`](demo/screenshots/) |
 
-For a quick preview, I have compressed the video even further: [watch the smaller preview video](demo/Capstone_Video_Very_Compressed.mp4).
+For a quick preview, I have compressed the video even further: [watch the compressed low quality video](demo/Capstone_Video_Very_Compressed.mp4).
 
 | Module | Evidence |
 |---|---|
