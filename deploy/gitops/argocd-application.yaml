@@ -12,8 +12,11 @@ spec:
     targetRevision: main
     path: helm
     helm:
+      releaseName: gamesense
       valueFiles:
         - values.yaml
+        # EKS capstone overlay; CI updates its image tags after publishing to GHCR.
+        - values-eks.yaml
   destination:
     server: https://kubernetes.default.svc
     namespace: gamesense

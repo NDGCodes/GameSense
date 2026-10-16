@@ -150,3 +150,31 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+
+  update-gitops:
+    runs-on: ubuntu-latest
+    needs: [publish-images]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    permissions:
+      contents: write
+    concurrency:
+      group: update-gitops
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Point the EKS overlay at the published images
+        run: |
+          tag="${GITHUB_SHA::7}"
+          sed -i -E "s/^(    tag: ).*/\1${tag}/" helm/values-eks.yaml
+          git diff --stat
+          if git diff --quiet; then
+            echo "values-eks.yaml already at ${tag}"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -am "Deploy ${tag} to EKS [skip ci]"
+          git push origin HEAD:main
