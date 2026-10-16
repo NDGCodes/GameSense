@@ -1,6 +1,6 @@
 # Milestone 3 local baseline recommender
 
-This milestone added an isolated local recommender module at `backend/app/recommender.py`. Milestone 5 can now expose it through the app when `RECOMMENDER_MODE=content`; the fixture recommender remains the default for backward compatibility.
+This milestone added an isolated local recommender module at `backend/app/recommender.py`. It is exposed through the app when `RECOMMENDER_MODE=content`; the fixture recommender remains the default for backward compatibility. For the later private Kaggle bundle and local content-mode verification, see [current evidence](current-evidence.md). The scope and test counts below record this earlier milestone.
 
 ## Scope
 

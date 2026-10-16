@@ -1,6 +1,6 @@
 # Local rubric gap evidence (2026-10-16)
 
-This is local/static evidence from branch `fm/gamesense-local-rubric-gaps`. Raw logs, API responses, and desktop/mobile screenshots are stored privately under `/Users/nishantdasgupta/Documents/ML_Ops/firstmate/data/gamesense-local-rubric-gaps/`; the real catalog bundle and generated data are not committed. This does not establish a live EKS deployment, AWS plan/apply/destroy, cluster observability, a main-branch publish run, or the final deployment demonstration.
+This is local/static evidence from branch `fm/gamesense-local-rubric-gaps`. Raw logs, API responses, and desktop/mobile screenshots are stored privately in the `gamesense-local-rubric-gaps/` firstmate task directory; the real catalog bundle and generated data are not committed. This dated branch run does not establish a live EKS deployment, AWS plan/apply/destroy, cluster observability, a main-branch publish run, or the final deployment demonstration. For later current-main app and CI observations, see the [current evidence index](current-evidence.md).
 
 | Area | Result | Private evidence |
 | --- | --- | --- |

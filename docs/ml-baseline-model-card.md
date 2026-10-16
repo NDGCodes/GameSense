@@ -1,5 +1,7 @@
 # GameSense baseline recommender model card
 
+This card describes the Milestone 4 **self-authored fixture evaluation** below. The later private Kaggle bundle is a separate fitted component; see the [current evidence index](current-evidence.md) for its identity and observed results, the [handoff guide](kaggle-steam-store-bundle.md) for its workflow and limitations, and the [source manifest](../data/source-manifests/kaggle.steam-store-games-clean.json) for its accepted scope.
+
 ## Model/component details
 
 - **Component:** `backend/app/recommender.py`

@@ -1,6 +1,6 @@
 # ML and data policy
 
-GameSense is preparing for a future hybrid recommender that may combine dense description embeddings, sparse TF-IDF features, and exact tag/genre signals. This document defines the Milestone 0 safeguards only; it does not authorize dataset acquisition, model training, model serving, or generated recommendation artifacts.
+This document records the Milestone 0 source safeguards. Since then, the selected Kaggle source received a narrowly approved local notebook/app-demo scope as recorded in the [source manifest](../data/source-manifests/kaggle.steam-store-games-clean.json) and [current evidence](current-evidence.md). This Milestone 0 policy does not authorize dataset acquisition or model training by itself; the later source-specific acceptance is limited to its recorded scope and grants no broader redistribution, production serving, or artifact publication rights. Possible future signals include dense description embeddings.
 
 ## Scope and data gates
 
@@ -10,9 +10,9 @@ GameSense is preparing for a future hybrid recommender that may combine dense de
 - Only tiny, intentional fixtures may be committed. They must be self-authored or otherwise clearly licensed for repository use, and must state their purpose.
 - If license terms, redistribution rights, attribution, or model-training rights are unclear, keep the review state unapproved and do not use the source for training, evaluation, or demos unless the captain explicitly accepts the disclosed uncertainty for a narrow recorded scope. A scoped acceptance is not legal clearance and must not be described as unrestricted redistribution rights.
 
-## Future hybrid recommender notes
+## Hybrid recommender notes
 
-Future implementation work should keep the signals separable so each can be tested and disabled independently:
+The local baseline combines sparse TF-IDF with exact tag/genre signals; any future work on additional signals should keep them separable so each can be tested and disabled independently:
 
 - dense embeddings from game descriptions or summaries;
 - sparse TF-IDF features from controlled text fields;

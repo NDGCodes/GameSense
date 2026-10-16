@@ -1,12 +1,12 @@
 # GameSense
 
-GameSense is a Steam-style game discovery app foundation for the DevOps/app-infrastructure phase of the project. This slice proves the local app, database migration, tests, containerization, CI/CD, GitOps, Kubernetes, Terraform, observability paths, and a license-scoped content-bundle path for a user-run Kaggle notebook.
+GameSense is a Steam-style game discovery app with a local catalog and similar-game flow. The repository includes database migrations, tests, containers, CI, static Terraform and Kubernetes/Helm definitions, and local monitoring assets. A private Kaggle run fitted a TF-IDF/tag baseline from a historical Steam Store Games snapshot; the returned bundle was loaded and exercised locally (see the [current evidence index](docs/current-evidence.md)). The repository does not contain a live AWS or Kubernetes deployment.
 
 The repository does **not** commit raw Steam/Kaggle data, generated recommendation bundles, fine-tuned models, live Steam trend signals, or unrestricted redistribution claims. Fixture mode still uses a tiny hand-written demo catalog so local and CI flows are testable without downloading or misrepresenting a real Steam dataset. Content mode can load a returned local Kaggle bundle from an ignored path when the user supplies it.
 
 ## Architecture overview
 
-- `frontend/` - React/Vite single-page app that calls the API, labels demo-fixture recommendations, and can list catalog titles from a loaded content bundle.
+- `frontend/` - React/Vite catalog and game-detail views with search, genre filtering of loaded games, paged catalog loading, and similar-game recommendations. Cards try Steam artwork for eligible catalog IDs and show a title placeholder when it fails.
 - `backend/` - FastAPI service with health/readiness checks, database-backed recommendation fixtures, content-bundle loading, Alembic migrations, tests, and Prometheus metrics.
 - `docker-compose.yml` - local Postgres, backend, frontend, Prometheus, and Grafana stack.
 - `.github/workflows/ci.yml` - CI validation, Docker image build, Trivy image scanning, and GHCR publishing on `main` pushes.
@@ -16,7 +16,7 @@ The repository does **not** commit raw Steam/Kaggle data, generated recommendati
 - `monitoring/` - Prometheus scrape config and Grafana dashboard provisioning.
 - `submission/` - [M9 local submission package](submission/M9-SUBMISSION-PACKAGE.md) plus [M10 walkthrough and evidence checklist](submission/M10-WALKTHROUGH.md).
 
-The [current local rubric evidence index](docs/local-rubric-evidence.md) records the latest tests, full-stack browser flow, image scans, and static infrastructure checks. It separates these from live cloud and submission proof.
+The [current evidence index](docs/current-evidence.md) identifies the verified private Kaggle/local-app run, two selected application screenshots from seven private originals, current CI evidence, and remaining screenshot and deployment gaps. The [earlier local rubric record](docs/local-rubric-evidence.md) remains a dated branch result.
 
 ## Local development
 
@@ -49,7 +49,7 @@ Local URLs after `docker compose up --build`:
 - Backend health: http://localhost:8000/health
 - Backend readiness: http://localhost:8000/ready
 - Backend metrics: http://localhost:8000/metrics
-- Shared demo saved-game list: `GET /api/saved-games`, `PUT /api/saved-games/{active-catalog-slug}` (no request body), and `DELETE /api/saved-games/{slug}`. The list persists in PostgreSQL and does not alter the catalog or recommendation ranking.
+- Shared saved-game list: `GET /api/saved-games`, `PUT /api/saved-games/{active-catalog-slug}` (no request body), and `DELETE /api/saved-games/{slug}`. The list persists in PostgreSQL and does not alter the catalog or recommendation ranking. It is an API capability; the current two-screen UI does not expose a saved-game control.
 - Prometheus: http://localhost:9090
 - Grafana: http://localhost:3000 (admin/admin, local demo only)
 
@@ -95,7 +95,7 @@ The [M8 final local evidence freeze and claim audit](docs/m8-final-local-evidenc
 
 ## Kaggle content-bundle handoff
 
-See [Kaggle Steam Store bundle handoff](docs/kaggle-steam-store-bundle.md) for notebook setup, returned artifacts, local backend startup, catalog selection, and recommendation limitations. The [source manifest](data/source-manifests/kaggle.steam-store-games-clean.json) owns the selected source’s provenance, attribution, and accepted usage scope.
+See [Kaggle Steam Store bundle handoff](docs/kaggle-steam-store-bundle.md) for notebook setup, the verified private run, local backend startup, and recommendation limitations. The [source manifest](data/source-manifests/kaggle.steam-store-games-clean.json) records the selected source’s provenance, attribution, and accepted usage scope. The [current evidence index](docs/current-evidence.md) owns the private run’s bundle identity and verification results. The bundle is not a tuned accuracy or personalization result.
 
 ## Demo fixture catalog
 
@@ -141,6 +141,7 @@ Implemented in this slice:
 - [x] Kaggle notebook handoff and local content-bundle loader for the selected Steam Store Games source, with attribution and uncertainty disclosures.
 - [x] Responsive recommendation cover cards with identity-bound Steam headers, same-game capsule fallback, and missing-artwork placeholders for the local demo.
 - [x] Returned real bundle imported and catalog artwork checked locally; see [coverage evidence and repeatable checks](docs/kaggle-steam-store-bundle.md#verified-catalog-artwork).
+- [x] Current desktop/mobile catalog → detail → similar-recommendation flow observed with the private bundle; see the [evidence index](docs/current-evidence.md).
 
 Deferred until the later authorized phases:
 
