@@ -161,6 +161,11 @@ def test_content_recommender_loads_returned_bundle_for_catalog_and_recommendatio
     assert catalog[0]["imageUrl"].endswith("/20/header.jpg")
     assert catalog[0]["imageFallbackUrl"].endswith("/20/capsule_231x87.jpg")
     assert "loaded Kaggle snapshot bundle" in catalog[0]["reason"]
+    assert client.put("/api/saved-games/steam-20", json={"note": "Revisit"}).json() == {
+        "slug": "steam-20", "note": "Revisit"
+    }
+    assert client.get("/api/saved-games").json() == [{"slug": "steam-20", "note": "Revisit"}]
+    assert client.delete("/api/saved-games/steam-20").status_code == 204
 
     first_page = client.get("/api/games?limit=1&offset=0").json()
     second_page = client.get("/api/games?limit=1&offset=1").json()
@@ -191,3 +196,20 @@ def test_readiness_checks_database_and_counts_catalog(tmp_path: Path) -> None:
     assert response.status_code == 200
     assert response.json()["database"] == "ok"
     assert response.json()["demoCatalogItems"] >= 6
+
+
+def test_saved_games_put_update_delete_persist_and_validate(tmp_path: Path, monkeypatch) -> None:
+    monkeypatch.setenv("RECOMMENDER_MODE", "fixture")
+    client = build_test_client(tmp_path)
+    slug = client.get("/api/games?limit=1").json()[0]["slug"]
+
+    assert client.put(f"/api/saved-games/{slug}", json={"note": "Play next"}).json() == {
+        "slug": slug, "note": "Play next"
+    }
+    assert client.put(f"/api/saved-games/{slug}", json={"note": "With friends"}).json()["note"] == "With friends"
+    assert client.get("/api/saved-games").json() == [{"slug": slug, "note": "With friends"}]
+    assert client.put("/api/saved-games/not-in-catalog", json={"note": "No"}).status_code == 404
+    assert client.put(f"/api/saved-games/{slug}", json={"note": "x" * 501}).status_code == 422
+    assert client.delete(f"/api/saved-games/{slug}").status_code == 204
+    assert client.get("/api/saved-games").json() == []
+    assert client.delete(f"/api/saved-games/{slug}").status_code == 404

@@ -1,19 +1,23 @@
 import os
 from time import perf_counter
 
-from fastapi import Depends, FastAPI, Request, Response
+from fastapi import Depends, FastAPI, HTTPException, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from prometheus_client import CONTENT_TYPE_LATEST, Counter, Gauge, Histogram, generate_latest
 from sqlalchemy.orm import Session
+from sqlalchemy import select
 
 from app.db import database_is_ready, get_session
-from app.recommender_service import active_catalog_count_for_api, list_games_for_api, recommend_for_api
+from app.models import SavedGame
+from app.recommender_service import active_catalog_count_for_api, active_game_by_slug_for_api, list_games_for_api, recommend_for_api
 from app.schemas import (
     GameOut,
     HealthResponse,
     ReadinessResponse,
     RecommendationRequest,
     RecommendationResponse,
+    SavedGameInput,
+    SavedGameOut,
 )
 
 REQUEST_COUNT = Counter(
@@ -111,6 +115,35 @@ def games(limit: int = 500, offset: int = 0, q: str | None = None, session: Sess
     catalog = list_games_for_api(session, limit=max(1, min(limit, 1000)), offset=max(0, offset), query=q)
     DEMO_CATALOG_GAMES.set(len(catalog))
     return catalog
+
+
+@app.get("/api/saved-games", response_model=list[SavedGameOut])
+def saved_games(session: Session = Depends(get_session)) -> list[SavedGameOut]:
+    return [SavedGameOut(slug=row.slug, note=row.note) for row in session.scalars(select(SavedGame).order_by(SavedGame.slug))]
+
+
+@app.put("/api/saved-games/{slug}", response_model=SavedGameOut)
+def save_game(slug: str, payload: SavedGameInput, session: Session = Depends(get_session)) -> SavedGameOut:
+    if active_game_by_slug_for_api(session, slug) is None:
+        raise HTTPException(status_code=404, detail="Game is not in the active catalog")
+    row = session.get(SavedGame, slug)
+    if row is None:
+        row = SavedGame(slug=slug, note=payload.note)
+        session.add(row)
+    else:
+        row.note = payload.note
+    session.commit()
+    return SavedGameOut(slug=row.slug, note=row.note)
+
+
+@app.delete("/api/saved-games/{slug}", status_code=204)
+def delete_saved_game(slug: str, session: Session = Depends(get_session)) -> Response:
+    row = session.get(SavedGame, slug)
+    if row is None:
+        raise HTTPException(status_code=404, detail="Saved game not found")
+    session.delete(row)
+    session.commit()
+    return Response(status_code=204)
 
 
 @app.post("/api/recommendations", response_model=RecommendationResponse)

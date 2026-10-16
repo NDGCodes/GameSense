@@ -10,11 +10,13 @@ The repository does **not** commit raw Steam/Kaggle data, generated recommendati
 - `backend/` - FastAPI service with health/readiness checks, database-backed recommendation fixtures, content-bundle loading, Alembic migrations, tests, and Prometheus metrics.
 - `docker-compose.yml` - local Postgres, backend, frontend, Prometheus, and Grafana stack.
 - `.github/workflows/ci.yml` - CI validation, Docker image build, Trivy image scanning, and GHCR publishing on `main` pushes.
-- `infra/terraform/` - AWS VPC and EKS foundation (plan/apply only with explicit cloud authorization).
-- `deploy/helm/` - Helm chart for the frontend/backend workloads, services, ingress, probes, and scrape annotations.
+- `terraform/` - AWS VPC and EKS foundation (plan/apply only with explicit cloud authorization).
+- `helm/` - Helm chart for the frontend/backend workloads, services, ingress, probes, and scrape annotations.
 - `deploy/gitops/` - Argo CD `Application` manifest for the Helm chart.
-- `observability/` - Prometheus scrape config and Grafana dashboard provisioning.
+- `monitoring/` - Prometheus scrape config and Grafana dashboard provisioning.
 - `submission/` - [M9 local submission package](submission/M9-SUBMISSION-PACKAGE.md) plus [M10 walkthrough and evidence checklist](submission/M10-WALKTHROUGH.md).
+
+The [current local rubric evidence index](docs/local-rubric-evidence.md) records the latest tests, full-stack browser flow, image scans, and static infrastructure checks. It separates these from live cloud and submission proof.
 
 ## Local development
 
@@ -47,6 +49,7 @@ Local URLs after `docker compose up --build`:
 - Backend health: http://localhost:8000/health
 - Backend readiness: http://localhost:8000/ready
 - Backend metrics: http://localhost:8000/metrics
+- Shared demo saved-game list: `GET /api/saved-games`, `PUT /api/saved-games/{active-catalog-slug}` with `{"note":"..."}`, and `DELETE /api/saved-games/{slug}`. The list persists in PostgreSQL and does not alter the catalog or recommendation ranking.
 - Prometheus: http://localhost:9090
 - Grafana: http://localhost:3000 (admin/admin, local demo only)
 
@@ -79,11 +82,11 @@ npm run build
 
 # Compose, Helm, and Terraform static validation
 docker compose config --quiet
-helm lint deploy/helm/gamesense
-helm template gamesense deploy/helm/gamesense >/tmp/gamesense-rendered.yaml
-terraform -chdir=infra/terraform fmt -check -recursive
-terraform -chdir=infra/terraform init -backend=false
-terraform -chdir=infra/terraform validate
+helm lint helm
+helm template gamesense helm >/tmp/gamesense-rendered.yaml
+terraform -chdir=terraform fmt -check -recursive
+terraform -chdir=terraform init -backend=false
+terraform -chdir=terraform validate
 ```
 
 Terraform commands download providers/modules but must not be followed by `plan` or `apply` unless AWS usage is authorized. Do not claim live AWS, Kubernetes, Prometheus, Grafana, or submission evidence until it is verified in the target environment.
@@ -118,7 +121,7 @@ These dashboards are local development assets only; this repository state does n
 - The backend reads `DATABASE_URL` when provided and otherwise falls back to local SQLite for quick manual runs.
 - The Helm chart can consume a Kubernetes Secret containing `DATABASE_URL` via `backend.database.urlSecretName`; without one, the container falls back to ephemeral SQLite for demo rendering.
 - The frontend Nginx image proxies API calls through `BACKEND_UPSTREAM`; Compose defaults it to `backend:8000`, and the Helm chart sets it to the rendered backend Service name.
-- Chart defaults point at the expected GHCR image names; use `deploy/helm/gamesense/values-local.yaml` for local clusters with preloaded images.
+- Chart defaults point at the expected GHCR image names; use `helm/values-local.yaml` for local clusters with preloaded images.
 - CI publishes images to GHCR only on pushes to `main`; pull requests build and scan images locally without pushing.
 - Argo CD points at this repository's `main` branch and the Helm chart path. Confirm image visibility/auth, DNS, TLS, and database secret values during a real deployment.
 

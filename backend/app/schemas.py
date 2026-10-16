@@ -23,6 +23,15 @@ class GameOut(BaseModel):
     imageFallbackUrl: str | None = None
 
 
+class SavedGameInput(BaseModel):
+    note: str = Field(default="", max_length=500)
+
+
+class SavedGameOut(BaseModel):
+    slug: str
+    note: str
+
+
 class RecommendationResponse(BaseModel):
     mode: RecommendationMode
     favoriteGame: str | None

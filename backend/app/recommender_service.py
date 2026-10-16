@@ -88,6 +88,19 @@ def list_games_for_api(session: Session, *, limit: int = 500, offset: int = 0, q
     return rows[offset:offset + limit]
 
 
+def active_game_by_slug_for_api(session: Session, slug: str) -> GameOut | None:
+    """Resolve a stable slug in the active catalog without page limits."""
+    if get_recommender_mode() == "content":
+        bundle = _load_configured_bundle()
+        if bundle is not None:
+            game = next((game for game in bundle.catalog if game.slug == slug and game.isActive), None)
+            return _to_bundle_catalog_game_out(bundle, game) if game is not None else None
+        game = next((game for game in _load_content_games() if game.slug == slug and game.isActive), None)
+        return _to_content_catalog_game_out(game) if game is not None else None
+    game = session.scalar(select(Game).where(Game.slug == slug, Game.is_active.is_(True)))
+    return to_game_out(game) if game is not None else None
+
+
 def active_catalog_count_for_api(session: Session) -> int:
     if get_recommender_mode() == "content":
         bundle = _load_configured_bundle()

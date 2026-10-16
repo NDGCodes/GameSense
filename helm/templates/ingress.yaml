@@ -17,7 +17,14 @@ spec:
     - host: {{ .Values.ingress.host | quote }}
       http:
         paths:
-          - path: {{ .Values.ingress.path | quote }}
+          - path: /api
+            pathType: {{ .Values.ingress.pathType }}
+            backend:
+              service:
+                name: {{ include "gamesense.fullname" . }}-backend
+                port:
+                  number: {{ .Values.backend.service.port }}
+          - path: /
             pathType: {{ .Values.ingress.pathType }}
             backend:
               service:

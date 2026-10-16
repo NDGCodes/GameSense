@@ -54,9 +54,9 @@ jobs:
 
       - name: Terraform format and validate
         run: |
-          terraform -chdir=infra/terraform fmt -check -recursive
-          terraform -chdir=infra/terraform init -backend=false
-          terraform -chdir=infra/terraform validate
+          terraform -chdir=terraform fmt -check -recursive
+          terraform -chdir=terraform init -backend=false
+          terraform -chdir=terraform validate
 
       - uses: azure/setup-helm@v4
         with:
@@ -64,8 +64,8 @@ jobs:
 
       - name: Helm lint and render
         run: |
-          helm lint deploy/helm/gamesense
-          helm template gamesense deploy/helm/gamesense >/tmp/gamesense-rendered.yaml
+          helm lint helm
+          helm template gamesense helm >/tmp/gamesense-rendered.yaml
 
   container-security:
     runs-on: ubuntu-latest
@@ -98,7 +98,7 @@ jobs:
           exit-code: '1'
           ignore-unfixed: true
           vuln-type: os,library
-          severity: CRITICAL
+          severity: HIGH,CRITICAL
 
   publish-images:
     runs-on: ubuntu-latest
@@ -139,7 +139,6 @@ jobs:
           images: ${{ steps.image.outputs.image }}
           tags: |
             type=sha,prefix=
-            type=raw,value=latest,enable={{is_default_branch}}
 
       - name: Build and publish image
         uses: docker/build-push-action@v6

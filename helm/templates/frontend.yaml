@@ -30,7 +30,7 @@ spec:
               value: {{ printf "%s-backend:%v" (include "gamesense.fullname" .) .Values.backend.service.port | quote }}
           ports:
             - name: http
-              containerPort: 80
+              containerPort: 8080
           readinessProbe:
             httpGet:
               path: /

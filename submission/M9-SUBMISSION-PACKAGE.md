@@ -25,9 +25,9 @@ Show these paths in the file tree:
 - `data/fixtures/ml/sample_games.self-authored.json` — tiny self-authored local sample catalog.
 - `notebooks/gamesense_baseline_kaggle.ipynb` — notebook workflow described in the [handoff guide](../docs/kaggle-steam-store-bundle.md).
 - `docker-compose.yml` — local Postgres/backend/frontend/Prometheus/Grafana stack.
-- `infra/terraform/` — AWS VPC/EKS infrastructure foundation for later authorized cloud work.
-- `deploy/helm/` and `deploy/gitops/` — Helm and Argo CD deployment manifests.
-- `observability/` — local Prometheus and Grafana provisioning.
+- `terraform/` — AWS VPC/EKS infrastructure foundation for later authorized cloud work.
+- `helm/` and `deploy/gitops/` — Helm and Argo CD deployment manifests.
+- `monitoring/` — local Prometheus and Grafana provisioning.
 - `docs/m8-final-local-evidence.md` — local evidence ledger and claim audit.
 - `submission/` — walkthrough/checklist material for reviewers.
 
@@ -73,7 +73,7 @@ Evidence to point at:
 
 ### 4. Infrastructure and observability readiness, not deployment (45-60 seconds)
 
-Show `infra/terraform/`, `deploy/helm/gamesense/`, `deploy/gitops/argocd-application.yaml`, and `observability/`.
+Show `terraform/`, `helm/`, `deploy/gitops/argocd-application.yaml`, and `monitoring/`.
 
 Narration:
 
@@ -125,8 +125,8 @@ Narration:
 | Does the backend test locally? | `docs/m8-final-local-evidence.md`, `backend/tests/` | See the [M8 evidence table](../docs/m8-final-local-evidence.md#evidence-bundle) for the recorded test count and interpreter. |
 | Does the frontend build locally? | `docs/m8-final-local-evidence.md`, `frontend/` | See the [M8 evidence table](../docs/m8-final-local-evidence.md#evidence-bundle) for the build result. |
 | Is Compose valid? | `docker-compose.yml`, M8 ledger | See the [M8 evidence table](../docs/m8-final-local-evidence.md#evidence-bundle) for config/content-smoke results and conditions. |
-| Is Helm ready for review? | `deploy/helm/gamesense/`, M8 ledger | See the [M8 evidence table](../docs/m8-final-local-evidence.md#evidence-bundle) for lint/render results. |
-| Is Terraform ready for static review? | `infra/terraform/`, M8 ledger | See the [M8 evidence table](../docs/m8-final-local-evidence.md#evidence-bundle) for static validation results and limits. |
+| Is Helm ready for review? | `helm/`, M8 ledger | See the [M8 evidence table](../docs/m8-final-local-evidence.md#evidence-bundle) for lint/render results. |
+| Is Terraform ready for static review? | `terraform/`, M8 ledger | See the [M8 evidence table](../docs/m8-final-local-evidence.md#evidence-bundle) for static validation results and limits. |
 | What data powers local recommendations? | `data/fixtures/ml/sample_games.self-authored.json`, `README.md`, `docs/ml-data-policy.md` | The M8/M9 evidence uses the self-authored fixture; see the [README](../README.md) for current serving options. |
 | Was real Kaggle/Steam data used? | `docs/m8-final-local-evidence.md`, `docs/ml-data-policy.md` | No real-data run is included in the M8/M9 evidence; see the [handoff guide](../docs/kaggle-steam-store-bundle.md) for the current workflow. |
 | Was a model trained or served? | `README.md`, `docs/ml-baseline-model-card.md`, M8 ledger | No returned artifact is included in this evidence; see the [README](../README.md) for current serving capabilities. |
