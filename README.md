@@ -44,14 +44,14 @@ npm run dev
 
 Local URLs after `docker compose up --build`:
 
-- Frontend: http://localhost:5173
+- Frontend: http://localhost:3000 (Vite development server remains on port 5173)
 - Backend docs: http://localhost:8000/docs
 - Backend health: http://localhost:8000/health
 - Backend readiness: http://localhost:8000/ready
 - Backend metrics: http://localhost:8000/metrics
 - Shared saved-game list: `GET /api/saved-games`, `PUT /api/saved-games/{active-catalog-slug}` (no request body), and `DELETE /api/saved-games/{slug}`. The list persists in PostgreSQL and does not alter the catalog or recommendation ranking. It is an API capability; the current two-screen UI does not expose a saved-game control.
 - Prometheus: http://localhost:9090
-- Grafana: http://localhost:3000 (admin/admin, local demo only)
+- Grafana: http://localhost:3001 (admin/admin, local demo only)
 
 ## Validation commands
 

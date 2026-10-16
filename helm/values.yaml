@@ -40,6 +40,15 @@ backend:
         # externally managed volume already provides mountPath.
         create: true
         name: ""
+    contentBundle:
+      # Optional externally created ConfigMap holding a validated content bundle zip
+      # (binaryData key fileName). Used only when mode is "content"; the bundle is
+      # private data and is never committed or rendered from the chart.
+      configMapName: ""
+      fileName: content-bundle.zip
+      mountPath: /app/data/bundle/content-bundle.zip
+      # Set to the bundle's SHA-256 so pods roll when the ConfigMap content changes.
+      checksum: ""
   database:
     # Create this Kubernetes Secret separately for the shared database.
     # The secret value should be a SQLAlchemy DATABASE_URL such as postgresql+pg8000://...

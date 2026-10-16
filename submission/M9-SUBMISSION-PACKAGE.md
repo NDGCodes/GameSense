@@ -21,7 +21,7 @@ curl -X POST http://localhost:8000/api/recommendations \
   -d '{"mode":"cozy","favorite_game":"Cozy Comet Cafe"}'
 ```
 
-The committed Compose mapping serves the frontend at `http://localhost:5173` and Grafana at `http://localhost:3000`. The private audit used a task-only override to capture the app at port 3000. To show real-catalog recommendations, follow the [bundle handoff](../docs/kaggle-steam-store-bundle.md) with the private zip and `RECOMMENDER_MODE=content`; do not claim the default Compose request above uses that bundle.
+The committed Compose mapping serves the frontend at `http://localhost:3000` and Grafana at `http://localhost:3001`. Earlier private audits used task-only port overrides; their dated evidence retains those original mappings. To show real-catalog recommendations, follow the [bundle handoff](../docs/kaggle-steam-store-bundle.md) with the private zip and `RECOMMENDER_MODE=content`; do not claim the default Compose request above uses that bundle.
 
 ## Evidence to supply and outstanding criteria
 

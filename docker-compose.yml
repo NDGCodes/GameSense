@@ -55,7 +55,7 @@ services:
   frontend:
     build: ./frontend
     ports:
-      - "5173:8080"
+      - "3000:8080"
     depends_on:
       backend:
         condition: service_healthy
@@ -78,12 +78,13 @@ services:
   grafana:
     image: grafana/grafana:11.2.0
     ports:
-      - "3000:3000"
+      - "3001:3000"
     environment:
       GF_SECURITY_ADMIN_USER: admin
       GF_SECURITY_ADMIN_PASSWORD: admin
     volumes:
-      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./monitoring/grafana/provisioning/datasources.yml:/etc/grafana/provisioning/datasources/gamesense.yml:ro
+      - ./monitoring/grafana/provisioning/dashboards.yml:/etc/grafana/provisioning/dashboards/gamesense.yml:ro
       - ./monitoring/grafana/dashboards:/var/lib/grafana/dashboards:ro
     depends_on:
       - prometheus

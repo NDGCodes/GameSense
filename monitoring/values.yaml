@@ -1,0 +1,6 @@
+prometheus:
+  image: prom/prometheus:v2.54.1
+  retention: 6h
+grafana:
+  image: grafana/grafana:11.2.0
+  adminSecretName: gamesense-grafana

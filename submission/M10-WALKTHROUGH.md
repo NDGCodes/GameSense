@@ -13,10 +13,10 @@ Use this file while preparing the final submission. The [current evidence index]
   - `curl http://localhost:8000/ready`
   - `curl -X POST http://localhost:8000/api/recommendations -H 'content-type: application/json' -d '{"mode":"cozy","favorite_game":"Cozy Comet Cafe"}'`
   - Confirm this default response identifies demo fixtures. For real-catalog recommendations, follow the [bundle handoff](../docs/kaggle-steam-store-bundle.md) with the private zip and `RECOMMENDER_MODE=content`.
-- Current UI: browse/search the paged catalog at http://localhost:5173, select a game, and inspect its detail and similar-game cards. Genre filters apply to all loaded games. Saved-game GET/PUT/DELETE is an API capability, not a visible UI control. Artwork is best effort; a blank-looking catalog card in a capture is not proof of a decoded image.
+- Current UI: browse/search the paged catalog at http://localhost:3000, select a game, and inspect its detail and similar-game cards. Genre filters apply to all loaded games. Saved-game GET/PUT/DELETE is an API capability, not a visible UI control. Artwork is best effort; a blank-looking catalog card in a capture is not proof of a decoded image.
 - Local observability smoke checks after Compose starts:
   - Prometheus at http://localhost:9090 can scrape `gamesense-backend-local`.
-  - Grafana at http://localhost:3000 loads the GameSense dashboard from provisioning.
+  - Grafana at http://localhost:3001 loads the GameSense dashboard from provisioning.
 - Helm static validation: run `helm lint helm`, `helm template gamesense helm`, and `helm template gamesense-content helm --set backend.recommender.mode=content`.
   - The default rendered chart keeps `RECOMMENDER_MODE=fixture`.
   - The content render sets `RECOMMENDER_MODE=content`, sets `CONTENT_FIXTURE_PATH=/app/data/fixtures/ml/sample_games.self-authored.json`, and mounts only the committed self-authored sample fixture from the chart artifact ConfigMap. The ConfigMap is annotated with the fixture path and SHA-256 checksum for review, but the backend does not enforce checksum verification at runtime.

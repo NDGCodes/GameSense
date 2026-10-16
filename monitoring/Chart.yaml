@@ -1,0 +1,5 @@
+apiVersion: v2
+name: gamesense-monitoring
+description: Namespace-scoped Prometheus and Grafana for the GameSense capstone
+version: 0.1.0
+type: application
