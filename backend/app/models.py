@@ -33,6 +33,14 @@ class Game(Base):
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
 
 
+class SavedGame(Base):
+    """Shared demo reading list, keyed by the active catalog's stable slug."""
+
+    __tablename__ = "saved_games"
+
+    slug: Mapped[str] = mapped_column(String(160), primary_key=True)
+
+
 class CatalogSource(Base):
     __tablename__ = "catalog_sources"
 

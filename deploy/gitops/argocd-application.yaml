@@ -10,7 +10,7 @@ spec:
   source:
     repoURL: https://github.com/NDGCodes/GameSense.git
     targetRevision: main
-    path: deploy/helm/gamesense
+    path: helm
     helm:
       valueFiles:
         - values.yaml

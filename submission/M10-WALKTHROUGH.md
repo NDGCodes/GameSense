@@ -4,7 +4,7 @@ Use this file while preparing the final submission. Do not mark cloud, cluster, 
 
 ## Verified local evidence this repository can produce
 
-- Codebase tour: show `frontend/`, `backend/`, `infra/terraform/`, `deploy/helm/`, `deploy/gitops/`, `observability/`, and `submission/`.
+- Codebase tour: show `frontend/`, `backend/`, `terraform/`, `helm/`, `deploy/gitops/`, `monitoring/`, and `submission/`.
 - Backend migration/test path: run `cd backend && python -m venv .venv && source .venv/bin/activate && python -m pip install -r requirements.txt -r requirements-dev.txt && pytest -q`.
 - Frontend build: run `cd frontend && npm ci && npm run build`.
 - Compose config: run `docker compose config --quiet` and, where Docker resources are available, `docker compose up --build`.
@@ -16,11 +16,11 @@ Use this file while preparing the final submission. Do not mark cloud, cluster, 
 - Local observability smoke checks after Compose starts:
   - Prometheus at http://localhost:9090 can scrape `gamesense-backend-local`.
   - Grafana at http://localhost:3000 loads the GameSense dashboard from provisioning.
-- Helm static validation: run `helm lint deploy/helm/gamesense`, `helm template gamesense deploy/helm/gamesense`, and `helm template gamesense-content deploy/helm/gamesense --set backend.recommender.mode=content`.
+- Helm static validation: run `helm lint helm`, `helm template gamesense helm`, and `helm template gamesense-content helm --set backend.recommender.mode=content`.
   - The default rendered chart keeps `RECOMMENDER_MODE=fixture`.
   - The content render sets `RECOMMENDER_MODE=content`, sets `CONTENT_FIXTURE_PATH=/app/data/fixtures/ml/sample_games.self-authored.json`, and mounts only the committed self-authored sample fixture from the chart artifact ConfigMap. The ConfigMap is annotated with the fixture path and SHA-256 checksum for review, but the backend does not enforce checksum verification at runtime.
 - Kaggle notebook and returned-bundle workflow: follow the [authoritative handoff guide](../docs/kaggle-steam-store-bundle.md). This is separate from the fixture-only local evidence below.
-- Terraform static validation: run `terraform -chdir=infra/terraform fmt -check -recursive`, `terraform -chdir=infra/terraform init -backend=false`, and `terraform -chdir=infra/terraform validate`.
+- Terraform static validation: run `terraform -chdir=terraform fmt -check -recursive`, `terraform -chdir=terraform init -backend=false`, and `terraform -chdir=terraform validate`.
 
 ## Evidence that still requires real external setup and has not been performed here
 

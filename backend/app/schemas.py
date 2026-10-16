@@ -23,6 +23,10 @@ class GameOut(BaseModel):
     imageFallbackUrl: str | None = None
 
 
+class SavedGameOut(BaseModel):
+    slug: str
+
+
 class RecommendationResponse(BaseModel):
     mode: RecommendationMode
     favoriteGame: str | None
