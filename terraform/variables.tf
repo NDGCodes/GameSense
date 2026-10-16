@@ -1,3 +1,15 @@
+variable "allowed_account_ids" {
+  description = "Optional AWS account allowlist to prevent deployment to the wrong account."
+  type        = list(string)
+  default     = []
+}
+
+variable "kubernetes_version" {
+  description = "EKS Kubernetes version; verify standard support in the target region before applying."
+  type        = string
+  default     = "1.35"
+}
+
 variable "aws_region" {
   description = "AWS region for the GameSense EKS foundation."
   type        = string

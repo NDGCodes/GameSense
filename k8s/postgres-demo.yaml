@@ -1,0 +1,44 @@
+# Disposable capstone database. emptyDir data is lost if the pod is replaced.
+# Create gamesense-database with POSTGRES_PASSWORD and DATABASE_URL first.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gamesense-postgres
+  namespace: gamesense
+spec:
+  replicas: 1
+  strategy: {type: Recreate}
+  selector:
+    matchLabels: {app: gamesense-postgres}
+  template:
+    metadata:
+      labels: {app: gamesense-postgres}
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:16-alpine
+          env:
+            - {name: POSTGRES_DB, value: gamesense}
+            - {name: POSTGRES_USER, value: gamesense}
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef: {name: gamesense-database, key: POSTGRES_PASSWORD}
+          ports: [{name: postgres, containerPort: 5432}]
+          readinessProbe:
+            exec: {command: [pg_isready, -U, gamesense, -d, gamesense]}
+          resources:
+            requests: {cpu: 100m, memory: 128Mi}
+            limits: {memory: 512Mi}
+          volumeMounts: [{name: data, mountPath: /var/lib/postgresql/data}]
+      volumes:
+        - name: data
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: gamesense-postgres
+  namespace: gamesense
+spec:
+  selector: {app: gamesense-postgres}
+  ports: [{name: postgres, port: 5432, targetPort: postgres}]

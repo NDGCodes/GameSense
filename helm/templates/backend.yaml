@@ -1,6 +1,9 @@
 {{- if and (gt (int .Values.backend.replicaCount) 1) (empty .Values.backend.database.urlSecretName) -}}
 {{- fail "backend.database.urlSecretName is required for multiple backend replicas; configure a shared PostgreSQL DATABASE_URL" -}}
 {{- end -}}
+{{- $fixture := and .Values.backend.recommender.contentFixture.configMap.create (eq .Values.backend.recommender.mode "content") -}}
+{{- $bundle := .Values.backend.recommender.contentBundle -}}
+{{- $useBundle := and $bundle.configMapName (eq .Values.backend.recommender.mode "content") -}}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -21,8 +24,11 @@ spec:
         app.kubernetes.io/component: backend
       annotations:
         {{- toYaml .Values.backend.podAnnotations | nindent 8 }}
-        {{- if and .Values.backend.recommender.contentFixture.configMap.create (eq .Values.backend.recommender.mode "content") }}
+        {{- if $fixture }}
         checksum/content-fixture: {{ .Files.Get .Values.backend.recommender.contentFixture.chartFile | sha256sum | quote }}
+        {{- end }}
+        {{- if and $useBundle $bundle.checksum }}
+        checksum/content-bundle: {{ $bundle.checksum | quote }}
         {{- end }}
     spec:
       {{- with .Values.imagePullSecrets }}
@@ -42,6 +48,10 @@ spec:
               value: {{ .Values.backend.recommender.mode | quote }}
             - name: CONTENT_FIXTURE_PATH
               value: {{ .Values.backend.recommender.contentFixture.mountPath | quote }}
+            {{- if $useBundle }}
+            - name: CONTENT_BUNDLE_PATH
+              value: {{ $bundle.mountPath | quote }}
+            {{- end }}
             {{- if .Values.backend.database.urlSecretName }}
             - name: DATABASE_URL
               valueFrom:
@@ -66,18 +76,33 @@ spec:
             periodSeconds: 20
           resources:
             {{- toYaml .Values.backend.resources | nindent 12 }}
-          {{- if and .Values.backend.recommender.contentFixture.configMap.create (eq .Values.backend.recommender.mode "content") }}
+          {{- if or $fixture $useBundle }}
           volumeMounts:
+            {{- if $fixture }}
             - name: content-fixture
               mountPath: {{ .Values.backend.recommender.contentFixture.mountPath | quote }}
               subPath: {{ .Values.backend.recommender.contentFixture.fileName | quote }}
               readOnly: true
+            {{- end }}
+            {{- if $useBundle }}
+            - name: content-bundle
+              mountPath: {{ $bundle.mountPath | quote }}
+              subPath: {{ $bundle.fileName | quote }}
+              readOnly: true
+            {{- end }}
           {{- end }}
-      {{- if and .Values.backend.recommender.contentFixture.configMap.create (eq .Values.backend.recommender.mode "content") }}
+      {{- if or $fixture $useBundle }}
       volumes:
+        {{- if $fixture }}
         - name: content-fixture
           configMap:
             name: {{ default (printf "%s-content-fixture" (include "gamesense.fullname" .)) .Values.backend.recommender.contentFixture.configMap.name | quote }}
+        {{- end }}
+        {{- if $useBundle }}
+        - name: content-bundle
+          configMap:
+            name: {{ $bundle.configMapName | quote }}
+        {{- end }}
       {{- end }}
 ---
 apiVersion: v1

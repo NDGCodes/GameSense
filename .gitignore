@@ -30,3 +30,4 @@ dist/
 
 # Tiny intentional fixtures and source manifests remain trackable under data/fixtures/ and data/source-manifests/.
 .DS_Store
+.env

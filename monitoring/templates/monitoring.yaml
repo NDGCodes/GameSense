@@ -1,0 +1,164 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ .Release.Name }}-prometheus
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ .Release.Name }}-prometheus
+rules:
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ .Release.Name }}-prometheus
+subjects:
+  - kind: ServiceAccount
+    name: {{ .Release.Name }}-prometheus
+roleRef:
+  kind: Role
+  name: {{ .Release.Name }}-prometheus
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-prometheus
+data:
+  prometheus.yml: |
+    global:
+      scrape_interval: 15s
+    scrape_configs:
+      - job_name: gamesense-backend-kubernetes
+        kubernetes_sd_configs:
+          - role: pod
+            namespaces:
+              names: [{{ .Release.Namespace | quote }}]
+        relabel_configs:
+          - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
+            action: keep
+            regex: "true"
+          - source_labels: [__meta_kubernetes_pod_phase]
+            action: keep
+            regex: Running
+          - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_path]
+            target_label: __metrics_path__
+          - source_labels: [__meta_kubernetes_pod_name]
+            target_label: pod
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-prometheus
+spec:
+  replicas: 1
+  selector:
+    matchLabels: {app: "{{ .Release.Name }}-prometheus"}
+  template:
+    metadata:
+      labels: {app: "{{ .Release.Name }}-prometheus"}
+    spec:
+      serviceAccountName: {{ .Release.Name }}-prometheus
+      securityContext: {runAsUser: 65534, runAsGroup: 65534, fsGroup: 65534}
+      containers:
+        - name: prometheus
+          image: {{ .Values.prometheus.image | quote }}
+          args: ["--config.file=/etc/prometheus/prometheus.yml", "--storage.tsdb.path=/prometheus", "--storage.tsdb.retention.time={{ .Values.prometheus.retention }}"]
+          ports: [{name: http, containerPort: 9090}]
+          readinessProbe:
+            httpGet: {path: /-/ready, port: http}
+          resources:
+            requests: {cpu: 100m, memory: 128Mi}
+            limits: {memory: 512Mi}
+          volumeMounts:
+            - {name: config, mountPath: /etc/prometheus, readOnly: true}
+            - {name: data, mountPath: /prometheus}
+      volumes:
+        - name: config
+          configMap: {name: "{{ .Release.Name }}-prometheus"}
+        - name: data
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-prometheus
+spec:
+  selector: {app: "{{ .Release.Name }}-prometheus"}
+  ports: [{name: http, port: 9090, targetPort: http}]
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-grafana
+data:
+  datasources.yaml: |
+    apiVersion: 1
+    datasources:
+      - name: Prometheus
+        type: prometheus
+        access: proxy
+        url: http://{{ .Release.Name }}-prometheus:9090
+        isDefault: true
+  dashboards.yaml: |
+    apiVersion: 1
+    providers:
+      - name: GameSense
+        orgId: 1
+        folder: GameSense
+        type: file
+        options:
+          path: /var/lib/grafana/dashboards
+  gamesense-app.json: |
+{{ .Files.Get "grafana/dashboards/gamesense-app.json" | indent 4 }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-grafana
+spec:
+  replicas: 1
+  selector:
+    matchLabels: {app: "{{ .Release.Name }}-grafana"}
+  template:
+    metadata:
+      labels: {app: "{{ .Release.Name }}-grafana"}
+    spec:
+      securityContext: {fsGroup: 472}
+      containers:
+        - name: grafana
+          image: {{ .Values.grafana.image | quote }}
+          env:
+            - name: GF_SECURITY_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.grafana.adminSecretName }}
+                  key: admin-password
+          ports: [{name: http, containerPort: 3000}]
+          readinessProbe:
+            httpGet: {path: /api/health, port: http}
+          resources:
+            requests: {cpu: 100m, memory: 128Mi}
+            limits: {memory: 512Mi}
+          volumeMounts:
+            - {name: config, mountPath: /etc/grafana/provisioning/datasources/datasources.yaml, subPath: datasources.yaml, readOnly: true}
+            - {name: config, mountPath: /etc/grafana/provisioning/dashboards/dashboards.yaml, subPath: dashboards.yaml, readOnly: true}
+            - {name: config, mountPath: /var/lib/grafana/dashboards/gamesense-app.json, subPath: gamesense-app.json, readOnly: true}
+            - {name: data, mountPath: /var/lib/grafana}
+      volumes:
+        - name: config
+          configMap: {name: "{{ .Release.Name }}-grafana"}
+        - name: data
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-grafana
+spec:
+  selector: {app: "{{ .Release.Name }}-grafana"}
+  ports: [{name: http, port: 3000, targetPort: http}]

@@ -66,6 +66,9 @@ jobs:
         run: |
           helm lint helm
           helm template gamesense helm >/tmp/gamesense-rendered.yaml
+          helm template gamesense helm --set ingress.host= --set ingress.className=traefik >/tmp/gamesense-hostless.yaml
+          helm lint monitoring
+          helm template gamesense-monitoring monitoring --namespace gamesense >/tmp/gamesense-monitoring.yaml
 
   container-security:
     runs-on: ubuntu-latest
