@@ -49,7 +49,7 @@ Local URLs after `docker compose up --build`:
 - Backend health: http://localhost:8000/health
 - Backend readiness: http://localhost:8000/ready
 - Backend metrics: http://localhost:8000/metrics
-- Shared demo saved-game list: `GET /api/saved-games`, `PUT /api/saved-games/{active-catalog-slug}` with `{"note":"..."}`, and `DELETE /api/saved-games/{slug}`. The list persists in PostgreSQL and does not alter the catalog or recommendation ranking.
+- Shared demo saved-game list: `GET /api/saved-games`, `PUT /api/saved-games/{active-catalog-slug}` (no request body), and `DELETE /api/saved-games/{slug}`. The list persists in PostgreSQL and does not alter the catalog or recommendation ranking.
 - Prometheus: http://localhost:9090
 - Grafana: http://localhost:3000 (admin/admin, local demo only)
 

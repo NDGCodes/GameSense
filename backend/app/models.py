@@ -39,7 +39,6 @@ class SavedGame(Base):
     __tablename__ = "saved_games"
 
     slug: Mapped[str] = mapped_column(String(160), primary_key=True)
-    note: Mapped[str] = mapped_column(String(500), nullable=False, default="")
 
 
 class CatalogSource(Base):

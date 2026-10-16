@@ -161,10 +161,10 @@ def test_content_recommender_loads_returned_bundle_for_catalog_and_recommendatio
     assert catalog[0]["imageUrl"].endswith("/20/header.jpg")
     assert catalog[0]["imageFallbackUrl"].endswith("/20/capsule_231x87.jpg")
     assert "loaded Kaggle snapshot bundle" in catalog[0]["reason"]
-    assert client.put("/api/saved-games/steam-20", json={"note": "Revisit"}).json() == {
-        "slug": "steam-20", "note": "Revisit"
+    assert client.put("/api/saved-games/steam-20").json() == {
+        "slug": "steam-20"
     }
-    assert client.get("/api/saved-games").json() == [{"slug": "steam-20", "note": "Revisit"}]
+    assert client.get("/api/saved-games").json() == [{"slug": "steam-20"}]
     assert client.delete("/api/saved-games/steam-20").status_code == 204
 
     first_page = client.get("/api/games?limit=1&offset=0").json()
@@ -203,13 +203,36 @@ def test_saved_games_put_update_delete_persist_and_validate(tmp_path: Path, monk
     client = build_test_client(tmp_path)
     slug = client.get("/api/games?limit=1").json()[0]["slug"]
 
-    assert client.put(f"/api/saved-games/{slug}", json={"note": "Play next"}).json() == {
-        "slug": slug, "note": "Play next"
-    }
-    assert client.put(f"/api/saved-games/{slug}", json={"note": "With friends"}).json()["note"] == "With friends"
-    assert client.get("/api/saved-games").json() == [{"slug": slug, "note": "With friends"}]
-    assert client.put("/api/saved-games/not-in-catalog", json={"note": "No"}).status_code == 404
-    assert client.put(f"/api/saved-games/{slug}", json={"note": "x" * 501}).status_code == 422
+    catalog = client.get("/api/games").json()
+    response = client.put(f"/api/saved-games/{slug}")
+    assert response.status_code == 200
+    assert response.json() == {"slug": slug}
+    assert client.put(f"/api/saved-games/{slug}").json() == {"slug": slug}
+    client = build_test_client(tmp_path)
+    assert client.get("/api/saved-games").json() == [{"slug": slug}]
+    assert client.put("/api/saved-games/not-in-catalog").status_code == 404
+    assert client.get("/api/games").json() == catalog
     assert client.delete(f"/api/saved-games/{slug}").status_code == 204
     assert client.get("/api/saved-games").json() == []
     assert client.delete(f"/api/saved-games/{slug}").status_code == 404
+
+
+def test_saved_games_preserve_existing_database_data(tmp_path: Path, monkeypatch) -> None:
+    monkeypatch.setenv("RECOMMENDER_MODE", "fixture")
+    client = build_test_client(tmp_path)
+    slugs = [game["slug"] for game in client.get("/api/games?limit=2").json()]
+    engine = create_engine(f"sqlite:///{tmp_path / 'gamesense-test.db'}", future=True)
+    with engine.begin() as connection:
+        connection.execute(text("ALTER TABLE saved_games ADD COLUMN note VARCHAR(500) NOT NULL DEFAULT ''"))
+        connection.execute(
+            text("INSERT INTO saved_games (slug, note) VALUES (:slug, :note)"),
+            {"slug": slugs[0], "note": "Existing user data"},
+        )
+
+    assert client.get("/api/saved-games").json() == [{"slug": slugs[0]}]
+    assert client.put(f"/api/saved-games/{slugs[0]}").json() == {"slug": slugs[0]}
+    assert client.put(f"/api/saved-games/{slugs[1]}").status_code == 200
+    with engine.connect() as connection:
+        assert connection.execute(
+            text("SELECT note FROM saved_games WHERE slug = :slug"), {"slug": slugs[0]}
+        ).scalar_one() == "Existing user data"

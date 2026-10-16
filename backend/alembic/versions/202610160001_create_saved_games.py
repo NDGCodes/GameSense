@@ -17,7 +17,6 @@ def upgrade() -> None:
     op.create_table(
         "saved_games",
         sa.Column("slug", sa.String(length=160), primary_key=True),
-        sa.Column("note", sa.String(length=500), nullable=False, server_default=""),
     )
 
 

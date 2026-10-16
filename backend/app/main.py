@@ -16,7 +16,6 @@ from app.schemas import (
     ReadinessResponse,
     RecommendationRequest,
     RecommendationResponse,
-    SavedGameInput,
     SavedGameOut,
 )
 
@@ -119,21 +118,19 @@ def games(limit: int = 500, offset: int = 0, q: str | None = None, session: Sess
 
 @app.get("/api/saved-games", response_model=list[SavedGameOut])
 def saved_games(session: Session = Depends(get_session)) -> list[SavedGameOut]:
-    return [SavedGameOut(slug=row.slug, note=row.note) for row in session.scalars(select(SavedGame).order_by(SavedGame.slug))]
+    return [SavedGameOut(slug=row.slug) for row in session.scalars(select(SavedGame).order_by(SavedGame.slug))]
 
 
 @app.put("/api/saved-games/{slug}", response_model=SavedGameOut)
-def save_game(slug: str, payload: SavedGameInput, session: Session = Depends(get_session)) -> SavedGameOut:
+def save_game(slug: str, session: Session = Depends(get_session)) -> SavedGameOut:
     if active_game_by_slug_for_api(session, slug) is None:
         raise HTTPException(status_code=404, detail="Game is not in the active catalog")
     row = session.get(SavedGame, slug)
     if row is None:
-        row = SavedGame(slug=slug, note=payload.note)
+        row = SavedGame(slug=slug)
         session.add(row)
-    else:
-        row.note = payload.note
     session.commit()
-    return SavedGameOut(slug=row.slug, note=row.note)
+    return SavedGameOut(slug=row.slug)
 
 
 @app.delete("/api/saved-games/{slug}", status_code=204)
