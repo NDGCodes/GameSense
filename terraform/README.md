@@ -20,6 +20,8 @@ These commands download providers/modules but do not create cloud resources.
 
 ## Authorized provisioning flow
 
+Review `terraform.tfvars.example` for non-secret input examples when preparing an authorized run. Variable definitions in `variables.tf` own input descriptions and defaults.
+
 ```bash
 terraform plan -out gamesense.plan
 # Review the plan, estimated cost, region, and account before applying.
